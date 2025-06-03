@@ -1,0 +1,15 @@
+Initialise un projet avec les contraintes suivantes :
+- il s'agit d'un projet maven dans le nom d'artefact est 'RememberMe'
+- Le code sera en Kotlin
+- Il s'agit d'un projet d'API web réalisé avec Spring
+- Il faut prévoir de se connecter à une base de donnée PostgrSQL
+- Les tests utiliseront Junit 5, AssertJ et testContainer
+- Le code du projet doit se faire dans un répertoire 'backend'
+
+Pour le moment crée seulement :
+- Le pom.xml
+- Les fichiers de configuration spring en YAML
+- Une classe permettant de démarrer le serveur
+
+
+###############
