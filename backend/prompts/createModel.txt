@@ -1,0 +1,9 @@
+Using DDD file structure, create a User model with the following fields :
+- id: UUID
+- pseudo: String
+- email: String
+
+##########################
+Il en fait des tonnes, alors que j'ai pas demandé grand chose
+Il crée tout du controller web à la BDD
+##########################
