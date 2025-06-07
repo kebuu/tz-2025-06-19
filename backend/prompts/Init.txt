@@ -13,3 +13,7 @@ Pour le moment crée seulement :
 
 
 ###############
+
+Ajoute un fichier docker compose permettant de démarrer en local une base postgresql.
+
+Utilise les paramêtres de configuration présents dans application.yml pour configurer la base
