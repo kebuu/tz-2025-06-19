@@ -1,5 +1,6 @@
 package com.example.rememberme.user.domain
 
+import com.example.rememberme.user.infrastructure.persistence.model.User
 import java.util.UUID
 import java.util.Optional
 
@@ -14,7 +15,7 @@ interface UserRepository {
      * @return An Optional containing the user if found, or empty if not found
      */
     fun findById(id: UUID): Optional<User>
-    
+
     /**
      * Find a user by their email.
      *
@@ -22,7 +23,7 @@ interface UserRepository {
      * @return An Optional containing the user if found, or empty if not found
      */
     fun findByEmail(email: String): Optional<User>
-    
+
     /**
      * Save a user to the repository.
      *
@@ -30,14 +31,14 @@ interface UserRepository {
      * @return The saved user
      */
     fun save(user: User): User
-    
+
     /**
      * Delete a user from the repository.
      *
      * @param user The user to delete
      */
     fun delete(user: User)
-    
+
     /**
      * Find all users in the repository.
      *

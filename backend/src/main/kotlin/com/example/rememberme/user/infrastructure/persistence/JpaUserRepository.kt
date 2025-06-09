@@ -1,17 +1,16 @@
-package com.example.rememberme.user.infrastructure
+package com.example.rememberme.user.infrastructure.persistence
 
-import com.example.rememberme.user.domain.User
+import com.example.rememberme.user.infrastructure.persistence.model.User
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
-import java.util.Optional
-import java.util.UUID
+import java.util.*
 
 /**
  * JPA implementation of the User repository.
  */
 @Repository
 interface JpaUserRepository : JpaRepository<User, UUID> {
-    
+
     /**
      * Find a user by their email.
      *

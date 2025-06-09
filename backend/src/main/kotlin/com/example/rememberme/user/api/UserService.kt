@@ -1,6 +1,6 @@
 package com.example.rememberme.user.api
 
-import com.example.rememberme.user.domain.User
+import com.example.rememberme.user.infrastructure.persistence.model.User
 import java.util.Optional
 import java.util.UUID
 
@@ -15,7 +15,7 @@ interface UserService {
      * @return An Optional containing the user if found, or empty if not found
      */
     fun findById(id: UUID): Optional<User>
-    
+
     /**
      * Find a user by their email.
      *
@@ -23,7 +23,7 @@ interface UserService {
      * @return An Optional containing the user if found, or empty if not found
      */
     fun findByEmail(email: String): Optional<User>
-    
+
     /**
      * Create a new user.
      *
@@ -32,7 +32,7 @@ interface UserService {
      * @return The created user
      */
     fun createUser(pseudo: String, email: String): User
-    
+
     /**
      * Update an existing user.
      *
@@ -42,7 +42,7 @@ interface UserService {
      * @return The updated user, or empty if the user was not found
      */
     fun updateUser(id: UUID, pseudo: String?, email: String?): Optional<User>
-    
+
     /**
      * Delete a user by their ID.
      *
@@ -50,7 +50,7 @@ interface UserService {
      * @return true if the user was deleted, false if the user was not found
      */
     fun deleteUser(id: UUID): Boolean
-    
+
     /**
      * Find all users.
      *

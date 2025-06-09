@@ -1,6 +1,6 @@
 package com.example.rememberme.user.api
 
-import com.example.rememberme.user.domain.User
+import com.example.rememberme.user.infrastructure.persistence.model.User
 import java.util.UUID
 
 /**

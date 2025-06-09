@@ -1,6 +1,7 @@
 package com.example.rememberme.user.api
 
-import com.example.rememberme.user.domain.User
+import com.example.rememberme.user.infrastructure.persistence.model.User
+
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -12,7 +13,7 @@ import java.util.UUID
 @RestController
 @RequestMapping("/users")
 class UserController(private val userService: UserService) {
-    
+
     /**
      * Get a user by their ID.
      *
@@ -22,14 +23,14 @@ class UserController(private val userService: UserService) {
     @GetMapping("/{id}")
     fun getUserById(@PathVariable id: UUID): ResponseEntity<UserDto> {
         val optionalUser = userService.findById(id)
-        
+
         return if (optionalUser.isPresent) {
             ResponseEntity.ok(UserDto.fromEntity(optionalUser.get()))
         } else {
             ResponseEntity.notFound().build()
         }
     }
-    
+
     /**
      * Get a user by their email.
      *
@@ -39,14 +40,14 @@ class UserController(private val userService: UserService) {
     @GetMapping("/by-email")
     fun getUserByEmail(@RequestParam email: String): ResponseEntity<UserDto> {
         val optionalUser = userService.findByEmail(email)
-        
+
         return if (optionalUser.isPresent) {
             ResponseEntity.ok(UserDto.fromEntity(optionalUser.get()))
         } else {
             ResponseEntity.notFound().build()
         }
     }
-    
+
     /**
      * Create a new user.
      *
@@ -60,10 +61,10 @@ class UserController(private val userService: UserService) {
             pseudo = createUserDto.pseudo,
             email = createUserDto.email
         )
-        
+
         return UserDto.fromEntity(user)
     }
-    
+
     /**
      * Update an existing user.
      *
@@ -81,14 +82,14 @@ class UserController(private val userService: UserService) {
             pseudo = updateUserDto.pseudo,
             email = updateUserDto.email
         )
-        
+
         return if (optionalUser.isPresent) {
             ResponseEntity.ok(UserDto.fromEntity(optionalUser.get()))
         } else {
             ResponseEntity.notFound().build()
         }
     }
-    
+
     /**
      * Delete a user by their ID.
      *
@@ -98,14 +99,14 @@ class UserController(private val userService: UserService) {
     @DeleteMapping("/{id}")
     fun deleteUser(@PathVariable id: UUID): ResponseEntity<Void> {
         val deleted = userService.deleteUser(id)
-        
+
         return if (deleted) {
             ResponseEntity.noContent().build()
         } else {
             ResponseEntity.notFound().build()
         }
     }
-    
+
     /**
      * Get all users.
      *
