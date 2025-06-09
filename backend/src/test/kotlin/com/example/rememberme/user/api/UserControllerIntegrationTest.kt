@@ -89,18 +89,32 @@ class UserControllerIntegrationTest {
         )
 
         // When
-        mockMvc.perform(
+        val result = mockMvc.perform(
             post("/users")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(createUserRequest))
         )
             // Then
             .andExpect(status().isCreated)
+            .andReturn()
+
+        // Get the location header from the response
+        val locationHeader = checkNotNull(result.response.getHeader("Location"))
 
         // Verify the user was saved to the database
         val users = jpaUserStore.findAll()
         assert(users.size == 3)
         assert(users.any { it.email == "newuser@example.com" && it.pseudo == "newuser" })
+
+        // Verify that the URI in the location header can be used to retrieve the newly created user
+        mockMvc.perform(
+            get(locationHeader)
+                .contentType(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(status().isOk)
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.email").value("newuser@example.com"))
+            .andExpect(jsonPath("$.pseudo").value("newuser"))
     }
 
     @Test

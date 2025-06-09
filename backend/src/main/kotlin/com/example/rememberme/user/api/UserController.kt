@@ -16,8 +16,9 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
-import java.net.URI
+import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder
 import java.util.UUID
+import kotlin.reflect.jvm.javaMethod
 
 
 @RestController
@@ -39,9 +40,8 @@ class UserController(
     }
 
     @GetMapping("/{id}")
-    fun getUser(@PathVariable id: String): ResponseEntity<UserDto> {
-        val userId = Id<User>(UUID.fromString(id))
-        return getUserUseCase.findById(userId)
+    fun getUser(@PathVariable id: UUID): ResponseEntity<UserDto> {
+        return getUserUseCase.findById(Id.of(id))
             ?.let { user ->
                 ResponseEntity.ok(UserDto(
                     id = user.id,
@@ -57,12 +57,22 @@ class UserController(
     fun createUser(
         @RequestBody request: CreateUserRequestDto
     ): ResponseEntity<Void> {
-        createUserUseCase.create(User(
+        val newUser = User(
             id = Id.random(),
             email = Email(request.email),
             pseudo = Pseudo(request.pseudo)
-        ))
+        )
+        createUserUseCase.create(newUser)
 
-        return ResponseEntity.created(URI.create("http://localhost:8080")).build()
+        return ResponseEntity.created(
+            MvcUriComponentsBuilder
+                .fromMethod(
+                    UserController::class.java,
+                    UserController::getUser.javaMethod!!,
+                    newUser.id.asString()
+                )
+                .build()
+                .toUri()
+        ).build()
     }
 }

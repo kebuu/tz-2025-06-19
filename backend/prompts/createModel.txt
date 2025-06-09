@@ -13,3 +13,8 @@ import flyway as project dependancies and create a migration script to initializ
 Can you find the last version of flyway-core using web site https://mvnrepository.com/
 => Failed
 ##########################
+
+The hard-coded URL in line 66 of UserController.kt was successfully replaced with MvcUriComponentsBuilder to dynamically build the location for the getUser endpoint. The implementation is error-free, and all tests passed successfully.
+update the test of createUser to make sure the that the Uri contains in the response let to retrieve the newly created user
+
+##########################
