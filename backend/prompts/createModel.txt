@@ -7,3 +7,9 @@ Using DDD file structure, create a User model with the following fields :
 Il en fait des tonnes, alors que j'ai pas demandé grand chose
 Il crée tout du controller web à la BDD
 ##########################
+
+import flyway as project dependancies and create a migration script to initialize a table named User and used to store the User model
+
+Can you find the last version of flyway-core using web site https://mvnrepository.com/
+=> Failed
+##########################
