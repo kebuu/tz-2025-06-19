@@ -1,3 +1,5 @@
+package com.example.rememberme.user.domain
+
 import com.example.rememberme.shared.domain.Id
 
 data class User(

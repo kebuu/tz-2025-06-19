@@ -1,13 +1,13 @@
 package com.example.rememberme.user.domain.usecase
 
 import com.example.rememberme.shared.domain.annotation.UseCase
-import jakarta.annotation.PostConstruct
+import com.example.rememberme.user.domain.User
+import com.example.rememberme.user.domain.spi.UserRepository
 
 @UseCase
-class GetUsersUseCase() {
-
-    @PostConstruct
-    fun init() {
-        println("Users use case initialized")
+class GetUsersUseCase(val userRepository: UserRepository) {
+    fun findAll(): List<User> {
+        return userRepository.findAll()
     }
+
 }
