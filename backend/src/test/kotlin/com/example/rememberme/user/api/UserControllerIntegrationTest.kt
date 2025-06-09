@@ -1,7 +1,8 @@
 package com.example.rememberme.user.api
 
 import com.example.rememberme.user.infrastructure.persistence.model.DbUser
-import com.example.rememberme.user.infrastructure.persistence.repository.JpaUserRepository
+import com.example.rememberme.user.infrastructure.persistence.repository.JpaUserStore
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -11,6 +12,7 @@ import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
@@ -25,18 +27,21 @@ class UserControllerIntegrationTest {
     private lateinit var mockMvc: MockMvc
 
     @Autowired
-    private lateinit var jpaUserRepository: JpaUserRepository
+    private lateinit var jpaUserStore: JpaUserStore
+
+    @Autowired
+    private lateinit var objectMapper: ObjectMapper
 
     @BeforeEach
     fun setup() {
         // Clean the database before each test
-        jpaUserRepository.deleteAll()
+        jpaUserStore.deleteAll()
 
         // Insert test data
         val userId1 = UUID.randomUUID()
         val userId2 = UUID.randomUUID()
 
-        jpaUserRepository.saveAll(
+        jpaUserStore.saveAll(
             listOf(
                 DbUser(
                     id = userId1,
@@ -70,5 +75,28 @@ class UserControllerIntegrationTest {
             .andExpect(jsonPath("$[1].id").exists())
             .andExpect(jsonPath("$[1].email").exists())
             .andExpect(jsonPath("$[1].pseudo").exists())
+    }
+
+    @Test
+    fun `should create a user when createUser is called`() {
+        // Given
+        val createUserRequest = CreateUserRequestDto(
+            email = "newuser@example.com",
+            pseudo = "newuser"
+        )
+
+        // When
+        mockMvc.perform(
+            post("/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createUserRequest))
+        )
+            // Then
+            .andExpect(status().isCreated)
+
+        // Verify the user was saved to the database
+        val users = jpaUserStore.findAll()
+        assert(users.size == 3)
+        assert(users.any { it.email == "newuser@example.com" && it.pseudo == "newuser" })
     }
 }

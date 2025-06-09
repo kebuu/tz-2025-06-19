@@ -1,4 +1,5 @@
 # Project Guidelines
+
 ## Database
 * All database table names must be singular
 * In SQL scripts, use IF EXISTS when possible
@@ -14,3 +15,6 @@
 
 ## Refactoring
 * When moving or renaming files, use IDE refactoring tools
+
+## Testing
+* Use AssertJ for assertions
