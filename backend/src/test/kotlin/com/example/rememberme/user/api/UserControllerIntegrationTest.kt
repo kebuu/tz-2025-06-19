@@ -32,14 +32,17 @@ class UserControllerIntegrationTest {
     @Autowired
     private lateinit var objectMapper: ObjectMapper
 
+    private lateinit var userId1: UUID
+    private lateinit var userId2: UUID
+
     @BeforeEach
     fun setup() {
         // Clean the database before each test
         jpaUserStore.deleteAll()
 
         // Insert test data
-        val userId1 = UUID.randomUUID()
-        val userId2 = UUID.randomUUID()
+        userId1 = UUID.randomUUID()
+        userId2 = UUID.randomUUID()
 
         jpaUserStore.saveAll(
             listOf(
@@ -98,5 +101,34 @@ class UserControllerIntegrationTest {
         val users = jpaUserStore.findAll()
         assert(users.size == 3)
         assert(users.any { it.email == "newuser@example.com" && it.pseudo == "newuser" })
+    }
+
+    @Test
+    fun `should return a user when getUser is called with valid id`() {
+        // When
+        mockMvc.perform(
+            get("/users/${userId1}")
+                .contentType(MediaType.APPLICATION_JSON)
+        )
+            // Then
+            .andExpect(status().isOk)
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.id").value(userId1.toString()))
+            .andExpect(jsonPath("$.email").value("user1@example.com"))
+            .andExpect(jsonPath("$.pseudo").value("user1"))
+    }
+
+    @Test
+    fun `should return 404 when getUser is called with non-existent id`() {
+        // Given
+        val nonExistentId = UUID.randomUUID()
+
+        // When
+        mockMvc.perform(
+            get("/users/${nonExistentId}")
+                .contentType(MediaType.APPLICATION_JSON)
+        )
+            // Then
+            .andExpect(status().isNotFound)
     }
 }

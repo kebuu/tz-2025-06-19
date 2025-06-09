@@ -12,6 +12,7 @@
     * the same domain package
 
 * Do not create documentation for classes nor functions expect if asked
+* When working on a specific task, do not refactor code not related to the task
 
 ## Refactoring
 * When moving or renaming files, use IDE refactoring tools

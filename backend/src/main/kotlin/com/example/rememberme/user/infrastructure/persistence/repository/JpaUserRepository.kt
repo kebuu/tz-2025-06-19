@@ -20,6 +20,16 @@ class JpaUserRepository(private val jpaUserStore: JpaUserStore) : UserRepository
         }
     }
 
+    override fun findById(id: Id<User>): User? {
+        return jpaUserStore.findUserById(id.value)?.let { dbUser ->
+            User(
+                id = Id(dbUser.id),
+                email = Email(dbUser.email),
+                pseudo = Pseudo(dbUser.pseudo)
+            )
+        }
+    }
+
     override fun save(user: User) {
         jpaUserStore.save(DbUser(
             id = user.id.value,
