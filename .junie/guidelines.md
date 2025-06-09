@@ -10,6 +10,7 @@
     * the shared package
     * the same domain package
 
+* Do not create documentation for classes nor functions expect if asked
 
 ## Refactoring
 * When moving or renaming files, use IDE refactoring tools
