@@ -9,7 +9,7 @@ import java.util.UUID
  * User entity representing a user in the system.
  */
 @Entity
-@Table(name = "user")
+@Table(name = "app_user")
 data class DbUser(
     @Id
     val id: UUID,
