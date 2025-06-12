@@ -23,3 +23,9 @@ Il a recreer le composant sideBAr et header en double il n'a pas modifier les co
 
 ######4
 
+tu doit modifier la sidebar pour que la page daily-comment-page, soit accessible depuis celle-ci
+
+Il ajoute correctent l'acces a la page en reprenant le code existant
+
+Les store sont directement dans les composant pas de séparation claire
+tout est un peux melanger

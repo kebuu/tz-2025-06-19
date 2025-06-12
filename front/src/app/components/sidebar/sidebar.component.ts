@@ -38,6 +38,15 @@ import { RouterModule } from '@angular/router';
             </svg>
             Utilisateurs
           </a>
+
+          <a routerLink="/daily-comments" 
+             routerLinkActive="bg-primary-50 text-primary-700 border-r-2 border-primary-500"
+             class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors group">
+            <svg class="w-5 h-5 mr-3 text-gray-500 group-hover:text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"></path>
+            </svg>
+            Commentaires
+          </a>
         </div>
         
         <div class="p-4 border-t border-gray-200">
