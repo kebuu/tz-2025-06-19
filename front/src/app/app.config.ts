@@ -8,14 +8,19 @@ import { provideStoreDevtools } from '@ngrx/store-devtools';
 import { routes } from './app.routes';
 import { userReducer } from './store/user/user.reducer';
 import { UserEffects } from './store/user/user.effects';
+import { dailyCommentReducer } from './store/daily-comment/daily-comment.reducer';
+import { DailyCommentEffects } from './store/daily-comment/daily-comment.effects';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
     provideHttpClient(withInterceptorsFromDi()),
-    provideStore({ user: userReducer }),
-    provideEffects([UserEffects]),
+    provideStore({ 
+      user: userReducer,
+      dailyComment: dailyCommentReducer 
+    }),
+    provideEffects([UserEffects, DailyCommentEffects]),
     provideStoreDevtools({
       maxAge: 25,
       logOnly: false,

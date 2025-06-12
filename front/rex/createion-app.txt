@@ -1,7 +1,25 @@
 Application generer 
  - Erreur sur la librairy ngrx qui est trop faible
+ - il a creer tout seul une gestion des Utilisateur et ainsi permis de les ajouter changer
+ - les test ne passe pas et doivent etre revue
+    - de plus la generation de la configuration est obsolete
+ - il a naturelement fait un systeme de routing pour la navigation
+ - il ne creer pas de fichier html et mets les template directement dans le ts
+ - l'architecture des dosier et criticable
+ - il prevois directement un utilisation responsive
+ - l'ajout de sutilisateur est absent
+ - le code hmtl et a revoir on peux faire bcp bcp plus simple
  - a oublier le fichier angular.json je pense que ça viens de l'architecture du dossier
     - je lui demande de  le generer
 
     Une fois ceux-ci gnérer l'application ce lance correctement
+
+#######3
+
+Use jet brains IA to add the first features
+il a creer les element l'application compile
+Les element ne sont pas rajouter a l'application deja existante
+Il a recreer le composant sideBAr et header en double il n'a pas modifier les co posant deja existant
+
+######4
 
