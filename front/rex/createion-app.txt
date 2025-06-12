@@ -1,0 +1,4 @@
+Application generer 
+ - Erreur sur la librairy ngrx qui est trop faible
+ - a oublier le fichier angular.json je pense que ça viens de l'architecture du dossier
+    - je lui demande de  le generer

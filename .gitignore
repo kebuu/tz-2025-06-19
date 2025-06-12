@@ -1,2 +1,3 @@
 /.idea
 /backend/target/
+/front/node_modules
