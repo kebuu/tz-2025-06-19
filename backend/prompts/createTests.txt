@@ -1,0 +1,10 @@
+C'est presque ça.
+Au final plutôt que de valider les champs un par un, je voudrais valider directement l'objet. Par exemple pour le test 'com.example.rememberme.user.api.UserControllerIntegrationTest#should return a user when getUser is called with valid id', à la fin je voudrais avoir
+
+assertThat(user).isEqualTo(UserDto(
+userId1.toString(),
+"user1@example.com",
+"user1"
+
+
+#############################

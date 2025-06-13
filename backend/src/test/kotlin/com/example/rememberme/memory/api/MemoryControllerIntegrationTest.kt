@@ -1,10 +1,15 @@
 package com.example.rememberme.memory.api
 
 import com.example.rememberme.memory.api.dto.CreateMemoryRequestDto
+import com.example.rememberme.memory.api.dto.MemoryDto
 import com.example.rememberme.memory.api.dto.UpdateMemoryRequestDto
+import com.example.rememberme.memory.domain.Memory
 import com.example.rememberme.memory.infrastructure.persistence.model.DbMemory
 import com.example.rememberme.memory.infrastructure.persistence.repository.JpaMemoryStore
+import com.example.rememberme.shared.domain.Id
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -18,11 +23,9 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.time.LocalDate
 import java.util.UUID
-import org.assertj.core.api.Assertions.assertThat
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -71,21 +74,31 @@ class MemoryControllerIntegrationTest {
     @Test
     fun `should return all memories when getAllMemories is called`() {
         // When
-        mockMvc.perform(
+        val result = mockMvc.perform(
             get("/memories")
                 .contentType(MediaType.APPLICATION_JSON)
         )
             // Then
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$").isArray)
-            .andExpect(jsonPath("$.length()").value(2))
-            .andExpect(jsonPath("$[0].id").exists())
-            .andExpect(jsonPath("$[0].text").exists())
-            .andExpect(jsonPath("$[0].day").exists())
-            .andExpect(jsonPath("$[1].id").exists())
-            .andExpect(jsonPath("$[1].text").exists())
-            .andExpect(jsonPath("$[1].day").exists())
+            .andReturn()
+
+        // Parse the response content into a list of MemoryDto objects
+        val memories: List<MemoryDto> = objectMapper.readValue(result.response.contentAsString)
+
+        // Validate the response using direct object equality comparison
+        assertThat(memories).containsExactlyInAnyOrder(
+            MemoryDto(
+                id = Id.of<Memory>(memoryId1),
+                text = "Memory 1 text",
+                day = today
+            ),
+            MemoryDto(
+                id = Id.of<Memory>(memoryId2),
+                text = "Memory 2 text",
+                day = yesterday
+            )
+        )
     }
 
     @Test
@@ -115,29 +128,47 @@ class MemoryControllerIntegrationTest {
         assertThat(memories.any { it.text == "New memory text" && it.day == today }).isTrue()
 
         // Verify that the URI in the location header can be used to retrieve the newly created memory
-        mockMvc.perform(
+        val getMemoryResult = mockMvc.perform(
             get(locationHeader)
                 .contentType(MediaType.APPLICATION_JSON)
         )
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.text").value("New memory text"))
-            .andExpect(jsonPath("$.day").value(today.toString()))
+            .andReturn()
+
+        // Parse the response content into a MemoryDto object
+        val memory: MemoryDto = objectMapper.readValue(getMemoryResult.response.contentAsString)
+
+        // Validate the response using direct object equality comparison
+        // We need to extract the ID from the memory object since it's generated dynamically
+        assertThat(memory).isEqualTo(MemoryDto(
+            id = memory.id,
+            text = "New memory text",
+            day = today
+        ))
     }
 
     @Test
     fun `should return a memory when getMemory is called with valid id`() {
         // When
-        mockMvc.perform(
+        val result = mockMvc.perform(
             get("/memories/${memoryId1}")
                 .contentType(MediaType.APPLICATION_JSON)
         )
             // Then
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.id").value(memoryId1.toString()))
-            .andExpect(jsonPath("$.text").value("Memory 1 text"))
-            .andExpect(jsonPath("$.day").value(today.toString()))
+            .andReturn()
+
+        // Parse the response content into a MemoryDto object
+        val memory: MemoryDto = objectMapper.readValue(result.response.contentAsString)
+
+        // Validate the response using direct object equality comparison
+        assertThat(memory).isEqualTo(MemoryDto(
+            id = Id.of<Memory>(memoryId1),
+            text = "Memory 1 text",
+            day = today
+        ))
     }
 
     @Test
@@ -210,7 +241,7 @@ class MemoryControllerIntegrationTest {
         // Verify the memory was deleted from the database
         val deletedMemory = jpaMemoryStore.findMemoryById(memoryId1)
         assertThat(deletedMemory).isNull()
-        
+
         // Verify that only one memory was deleted
         val remainingMemories = jpaMemoryStore.findAll()
         assertThat(remainingMemories).hasSize(1)

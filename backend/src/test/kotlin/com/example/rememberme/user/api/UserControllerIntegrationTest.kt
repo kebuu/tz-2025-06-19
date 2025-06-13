@@ -1,9 +1,16 @@
 package com.example.rememberme.user.api
 
+import com.example.rememberme.shared.domain.Id
 import com.example.rememberme.user.api.dto.CreateUserRequestDto
+import com.example.rememberme.user.api.dto.UserDto
+import com.example.rememberme.user.domain.Email
+import com.example.rememberme.user.domain.Pseudo
+import com.example.rememberme.user.domain.User
 import com.example.rememberme.user.infrastructure.persistence.model.DbUser
 import com.example.rememberme.user.infrastructure.persistence.repository.JpaUserStore
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -15,7 +22,6 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.util.UUID
 
@@ -64,21 +70,31 @@ class UserControllerIntegrationTest {
     @Test
     fun `should return all users when getAllUsers is called`() {
         // When
-        mockMvc.perform(
+        val result = mockMvc.perform(
             get("/users")
                 .contentType(MediaType.APPLICATION_JSON)
         )
             // Then
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$").isArray)
-            .andExpect(jsonPath("$.length()").value(2))
-            .andExpect(jsonPath("$[0].id").exists())
-            .andExpect(jsonPath("$[0].email").exists())
-            .andExpect(jsonPath("$[0].pseudo").exists())
-            .andExpect(jsonPath("$[1].id").exists())
-            .andExpect(jsonPath("$[1].email").exists())
-            .andExpect(jsonPath("$[1].pseudo").exists())
+            .andReturn()
+
+        // Parse the response content into a list of UserDto objects
+        val users: List<UserDto> = objectMapper.readValue(result.response.contentAsString)
+
+        // Validate the response using direct object equality comparison
+        assertThat(users).containsExactlyInAnyOrder(
+            UserDto(
+                id = Id.of<User>(userId1),
+                email = Email("user1@example.com"),
+                pseudo = Pseudo("user1")
+            ),
+            UserDto(
+                id = Id.of<User>(userId2),
+                email = Email("user2@example.com"),
+                pseudo = Pseudo("user2")
+            )
+        )
     }
 
     @Test
@@ -108,29 +124,47 @@ class UserControllerIntegrationTest {
         assert(users.any { it.email == "newuser@example.com" && it.pseudo == "newuser" })
 
         // Verify that the URI in the location header can be used to retrieve the newly created user
-        mockMvc.perform(
+        val getUserResult = mockMvc.perform(
             get(locationHeader)
                 .contentType(MediaType.APPLICATION_JSON)
         )
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.email").value("newuser@example.com"))
-            .andExpect(jsonPath("$.pseudo").value("newuser"))
+            .andReturn()
+
+        // Parse the response content into a UserDto object
+        val user: UserDto = objectMapper.readValue(getUserResult.response.contentAsString)
+
+        // Validate the response using direct object equality comparison
+        // We need to extract the ID from the user object since it's generated dynamically
+        assertThat(user).isEqualTo(UserDto(
+            id = user.id,
+            email = Email("newuser@example.com"),
+            pseudo = Pseudo("newuser")
+        ))
     }
 
     @Test
     fun `should return a user when getUser is called with valid id`() {
         // When
-        mockMvc.perform(
+        val result = mockMvc.perform(
             get("/users/${userId1}")
                 .contentType(MediaType.APPLICATION_JSON)
         )
             // Then
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.id").value(userId1.toString()))
-            .andExpect(jsonPath("$.email").value("user1@example.com"))
-            .andExpect(jsonPath("$.pseudo").value("user1"))
+            .andReturn()
+
+        // Parse the response content into a UserDto object
+        val user: UserDto = objectMapper.readValue(result.response.contentAsString)
+
+        // Validate the response using direct object equality comparison
+        assertThat(user).isEqualTo(UserDto(
+            id = Id.of<User>(userId1),
+            email = Email("user1@example.com"),
+            pseudo = Pseudo("user1")
+        ))
     }
 
     @Test
