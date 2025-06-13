@@ -1,5 +1,6 @@
 package com.example.rememberme.user.api
 
+import com.example.rememberme.user.api.dto.CreateUserRequestDto
 import com.example.rememberme.user.infrastructure.persistence.model.DbUser
 import com.example.rememberme.user.infrastructure.persistence.repository.JpaUserStore
 import com.fasterxml.jackson.databind.ObjectMapper

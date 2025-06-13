@@ -1,4 +1,4 @@
-package com.example.rememberme.user.api
+package com.example.rememberme.user.api.dto
 
 import com.example.rememberme.shared.domain.Id
 import com.example.rememberme.user.domain.Email

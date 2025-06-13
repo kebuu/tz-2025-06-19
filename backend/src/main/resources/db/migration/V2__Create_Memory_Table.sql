@@ -1,0 +1,5 @@
+CREATE TABLE memory (
+    id UUID PRIMARY KEY,
+    text VARCHAR(1000) NOT NULL,
+    day DATE NOT NULL
+);

@@ -1,6 +1,8 @@
-package com.example.rememberme.user.api
+package com.example.rememberme.user.api.controller
 
 import com.example.rememberme.shared.domain.Id
+import com.example.rememberme.user.api.dto.CreateUserRequestDto
+import com.example.rememberme.user.api.dto.UserDto
 import com.example.rememberme.user.domain.Email
 import com.example.rememberme.user.domain.Pseudo
 import com.example.rememberme.user.domain.User
@@ -19,7 +21,6 @@ import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder
 import java.util.UUID
 import kotlin.reflect.jvm.javaMethod
-
 
 @RestController
 @RequestMapping("/users")
@@ -41,13 +42,15 @@ class UserController(
 
     @GetMapping("/{id}")
     fun getUser(@PathVariable id: UUID): ResponseEntity<UserDto> {
-        return getUserUseCase.findById(Id.of(id))
+        return getUserUseCase.findById(Id.Companion.of(id))
             ?.let { user ->
-                ResponseEntity.ok(UserDto(
-                    id = user.id,
-                    email = user.email,
-                    pseudo = user.pseudo
-                ))
+                ResponseEntity.ok(
+                    UserDto(
+                        id = user.id,
+                        email = user.email,
+                        pseudo = user.pseudo
+                    )
+                )
             }
             ?: ResponseEntity.notFound().build()
     }
@@ -58,7 +61,7 @@ class UserController(
         @RequestBody request: CreateUserRequestDto
     ): ResponseEntity<Void> {
         val newUser = User(
-            id = Id.random(),
+            id = Id.Companion.random(),
             email = Email(request.email),
             pseudo = Pseudo(request.pseudo)
         )
