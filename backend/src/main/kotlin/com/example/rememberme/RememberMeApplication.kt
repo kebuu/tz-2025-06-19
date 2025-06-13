@@ -15,7 +15,10 @@ class RememberMeApplication {
         return BeanDefinitionRegistryPostProcessor { registry ->
             val scanner = ClassPathBeanDefinitionScanner(registry, false)
             scanner.addIncludeFilter(AnnotationTypeFilter(UseCase::class.java))
-            scanner.scan("com.example.rememberme.user.domain.usecase")
+            scanner.scan(
+                "com.example.rememberme.user.domain.usecase",
+                "com.example.rememberme.memory.domain.usecase"
+            )
         }
     }
 }
