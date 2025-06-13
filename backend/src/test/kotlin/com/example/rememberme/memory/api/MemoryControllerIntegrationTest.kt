@@ -7,6 +7,8 @@ import com.example.rememberme.memory.domain.Memory
 import com.example.rememberme.memory.infrastructure.persistence.model.DbMemory
 import com.example.rememberme.memory.infrastructure.persistence.repository.JpaMemoryStore
 import com.example.rememberme.shared.domain.Id
+import com.example.rememberme.user.infrastructure.persistence.model.DbUser
+import com.example.rememberme.user.infrastructure.persistence.repository.JpaUserStore
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import org.assertj.core.api.Assertions.assertThat
@@ -22,9 +24,11 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delet
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
+import org.springframework.test.web.servlet.request.RequestPostProcessor
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.time.LocalDate
+import java.util.Base64
 import java.util.UUID
 
 @SpringBootTest
@@ -39,17 +43,41 @@ class MemoryControllerIntegrationTest {
     private lateinit var jpaMemoryStore: JpaMemoryStore
 
     @Autowired
+    private lateinit var jpaUserStore: JpaUserStore
+
+    @Autowired
     private lateinit var objectMapper: ObjectMapper
 
     private lateinit var memoryId1: UUID
     private lateinit var memoryId2: UUID
+    private lateinit var userId: UUID
     private val today = LocalDate.now()
     private val yesterday = today.minusDays(1)
+
+    // Helper method for Basic authentication
+    private fun basicAuth(username: String, password: String): RequestPostProcessor {
+        return RequestPostProcessor { request ->
+            val base64Credentials = Base64.getEncoder().encodeToString("$username:$password".toByteArray())
+            request.addHeader("Authorization", "Basic $base64Credentials")
+            request
+        }
+    }
 
     @BeforeEach
     fun setup() {
         // Clean the database before each test
         jpaMemoryStore.deleteAll()
+        jpaUserStore.deleteAll()
+
+        // Create a test user
+        userId = UUID.randomUUID()
+        jpaUserStore.save(
+            DbUser(
+                id = userId,
+                pseudo = "testUser",
+                email = "test@example.com"
+            )
+        )
 
         // Insert test data
         memoryId1 = UUID.randomUUID()
@@ -77,6 +105,7 @@ class MemoryControllerIntegrationTest {
         val result = mockMvc.perform(
             get("/memories")
                 .contentType(MediaType.APPLICATION_JSON)
+                .with(basicAuth(userId.toString(), "zenika"))
         )
             // Then
             .andExpect(status().isOk)
@@ -114,6 +143,7 @@ class MemoryControllerIntegrationTest {
             post("/memories")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(createMemoryRequest))
+                .with(basicAuth(userId.toString(), "zenika"))
         )
             // Then
             .andExpect(status().isCreated)
@@ -131,6 +161,7 @@ class MemoryControllerIntegrationTest {
         val getMemoryResult = mockMvc.perform(
             get(locationHeader)
                 .contentType(MediaType.APPLICATION_JSON)
+                .with(basicAuth(userId.toString(), "zenika"))
         )
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -154,6 +185,7 @@ class MemoryControllerIntegrationTest {
         val result = mockMvc.perform(
             get("/memories/${memoryId1}")
                 .contentType(MediaType.APPLICATION_JSON)
+                .with(basicAuth(userId.toString(), "zenika"))
         )
             // Then
             .andExpect(status().isOk)
@@ -180,6 +212,7 @@ class MemoryControllerIntegrationTest {
         mockMvc.perform(
             get("/memories/${nonExistentId}")
                 .contentType(MediaType.APPLICATION_JSON)
+                .with(basicAuth(userId.toString(), "zenika"))
         )
             // Then
             .andExpect(status().isNotFound)
@@ -198,6 +231,7 @@ class MemoryControllerIntegrationTest {
             put("/memories/${memoryId1}")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateMemoryRequest))
+                .with(basicAuth(userId.toString(), "zenika"))
         )
             // Then
             .andExpect(status().isNoContent)
@@ -223,6 +257,7 @@ class MemoryControllerIntegrationTest {
             put("/memories/${nonExistentId}")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateMemoryRequest))
+                .with(basicAuth(userId.toString(), "zenika"))
         )
             // Then
             .andExpect(status().isNotFound)
@@ -234,6 +269,7 @@ class MemoryControllerIntegrationTest {
         mockMvc.perform(
             delete("/memories/${memoryId1}")
                 .contentType(MediaType.APPLICATION_JSON)
+                .with(basicAuth(userId.toString(), "zenika"))
         )
             // Then
             .andExpect(status().isNoContent)
@@ -257,6 +293,7 @@ class MemoryControllerIntegrationTest {
         mockMvc.perform(
             delete("/memories/${nonExistentId}")
                 .contentType(MediaType.APPLICATION_JSON)
+                .with(basicAuth(userId.toString(), "zenika"))
         )
             // Then
             .andExpect(status().isNoContent)
@@ -264,5 +301,32 @@ class MemoryControllerIntegrationTest {
         // Verify that no memories were deleted
         val remainingMemories = jpaMemoryStore.findAll()
         assertThat(remainingMemories).hasSize(2)
+    }
+
+    @Test
+    fun `should return 401 when getAllMemories is called with non-existent user id`() {
+        // Given
+        val nonExistentUserId = UUID.randomUUID()
+
+        // When
+        mockMvc.perform(
+            get("/memories")
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(basicAuth(nonExistentUserId.toString(), "zenika"))
+        )
+            // Then
+            .andExpect(status().isUnauthorized)
+    }
+
+    @Test
+    fun `should return 401 when getAllMemories is called with incorrect password`() {
+        // When
+        mockMvc.perform(
+            get("/memories")
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(basicAuth(userId.toString(), "wrongpassword"))
+        )
+            // Then
+            .andExpect(status().isUnauthorized)
     }
 }

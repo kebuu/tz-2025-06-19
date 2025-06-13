@@ -1,0 +1,10 @@
+Ajoute les dépendances à spring-security et assures toi que les appelles au MemoryController sont fait uniquement par des utilisateurs identifiés.
+
+Les utilisateurs s'identifie en Basic à chaque requête.
+
+Le login d'un utilisateur est son id, le password est le même pour tous les utilisateurs et il vaut : zenika
+
+######################################
+
+The last test method has been updated to include Basic authentication in each request. The changes have been successfully applied to the test file.
+
