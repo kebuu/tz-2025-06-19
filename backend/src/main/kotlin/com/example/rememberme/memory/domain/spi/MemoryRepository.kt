@@ -6,8 +6,6 @@ import com.example.rememberme.user.domain.User
 
 interface MemoryRepository {
 
-    fun findAll() : List<Memory>
-
     fun findByUserId(userId: Id<User>): List<Memory>
 
     fun findById(id: Id<Memory>): Memory?

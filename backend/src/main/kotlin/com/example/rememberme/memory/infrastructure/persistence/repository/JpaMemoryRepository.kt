@@ -10,12 +10,6 @@ import org.springframework.stereotype.Component
 
 @Component
 class JpaMemoryRepository(private val jpaMemoryStore: JpaMemoryStore) : MemoryRepository {
-    override fun findAll(): List<Memory> {
-        return jpaMemoryStore.findAll().map {
-            toDomain(it)
-        }
-    }
-
     override fun findByUserId(userId: Id<User>): List<Memory> {
         return jpaMemoryStore.findAllByUserId(userId.value).map {
             toDomain(it)

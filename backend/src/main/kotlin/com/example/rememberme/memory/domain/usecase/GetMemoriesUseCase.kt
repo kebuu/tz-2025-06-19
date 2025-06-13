@@ -8,10 +8,6 @@ import com.example.rememberme.user.domain.User
 
 @UseCase
 class GetMemoriesUseCase(val memoryRepository: MemoryRepository) {
-    fun findAll(): List<Memory> {
-        return memoryRepository.findAll()
-    }
-
     fun findByUserId(userId: Id<User>): List<Memory> {
         return memoryRepository.findByUserId(userId)
     }
