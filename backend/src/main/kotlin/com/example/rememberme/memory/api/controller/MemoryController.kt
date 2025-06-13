@@ -43,7 +43,7 @@ class MemoryController(
     @GetMapping
     fun getAllMemories(@AuthenticationPrincipal userDetails: UserDetails): List<MemoryDto> {
         val userId = UUID.fromString(userDetails.username)
-        return memoriesUseCase.findByUserId(Id.of<User>(userId)).map { memory ->
+        return memoriesUseCase.execute(Id.of<User>(userId)).map { memory ->
             MemoryDto(
                 id = memory.id,
                 text = memory.text.value,
@@ -54,7 +54,7 @@ class MemoryController(
 
     @GetMapping("/{id}")
     fun getMemory(@PathVariable id: UUID): ResponseEntity<MemoryDto> {
-        return getMemoryUseCase.findById(Id.of(id))
+        return getMemoryUseCase.execute(Id.of(id))
             ?.let { memory ->
                 ResponseEntity.ok(
                     MemoryDto(
@@ -80,7 +80,7 @@ class MemoryController(
             day = request.day,
             userId = Id.of<User>(userId)
         )
-        createMemoryUseCase.create(newMemory)
+        createMemoryUseCase.execute(newMemory)
 
         return ResponseEntity.created(
             MvcUriComponentsBuilder
@@ -100,7 +100,7 @@ class MemoryController(
         @RequestBody request: UpdateMemoryRequestDto,
         @AuthenticationPrincipal userDetails: UserDetails
     ): ResponseEntity<Void> {
-        return getMemoryUseCase.findById(Id.of<Memory>(id))?.let { existingMemory ->
+        return getMemoryUseCase.execute(Id.of<Memory>(id))?.let { existingMemory ->
             val userId = UUID.fromString(userDetails.username)
             val updatedMemory = Memory(
                 id = existingMemory.id,
@@ -108,7 +108,7 @@ class MemoryController(
                 day = request.day,
                 userId = Id.of<User>(userId)
             )
-            updateMemoryUseCase.update(updatedMemory)
+            updateMemoryUseCase.execute(updatedMemory)
             ResponseEntity.noContent().build()
         }
         ?: ResponseEntity.notFound().build()
@@ -122,7 +122,7 @@ class MemoryController(
         @PathVariable id: UUID,
         @AuthenticationPrincipal userDetails: UserDetails
     ): ResponseEntity<Void> {
-        deleteMemoryUseCase.delete(Id.of<Memory>(id))
+        deleteMemoryUseCase.execute(Id.of<Memory>(id))
         return ResponseEntity.noContent().build()
     }
 }

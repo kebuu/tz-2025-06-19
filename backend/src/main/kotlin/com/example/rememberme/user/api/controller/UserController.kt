@@ -34,7 +34,7 @@ class UserController(
 ) {
 
     @GetMapping
-    fun getAllUsers(): List<UserDto> = userUseCase.findAll().map { user ->
+    fun getAllUsers(): List<UserDto> = userUseCase.execute(Unit).map { user ->
         UserDto(
             id = user.id,
             email = user.email,
@@ -44,7 +44,7 @@ class UserController(
 
     @GetMapping("/{id}")
     fun getUser(@PathVariable id: UUID): ResponseEntity<UserDto> {
-        return getUserUseCase.findById(Id.Companion.of(id))
+        return getUserUseCase.execute(Id.Companion.of(id))
             ?.let { user ->
                 ResponseEntity.ok(
                     UserDto(
@@ -67,7 +67,7 @@ class UserController(
             email = Email(request.email),
             pseudo = Pseudo(request.pseudo)
         )
-        createUserUseCase.create(newUser)
+        createUserUseCase.execute(newUser)
 
         val userDto = UserDto(
             id = newUser.id,
