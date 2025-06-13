@@ -8,4 +8,5 @@ import java.util.UUID
 @Repository
 interface JpaMemoryStore : JpaRepository<DbMemory, UUID> {
     fun findMemoryById(id: UUID): DbMemory?
+    fun findAllByUserId(userId: UUID): List<DbMemory>
 }

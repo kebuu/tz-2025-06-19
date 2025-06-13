@@ -63,6 +63,9 @@ class MemoryControllerIntegrationTest {
         }
     }
 
+    private lateinit var otherUserId: UUID
+    private lateinit var otherUserMemoryId: UUID
+
     @BeforeEach
     fun setup() {
         // Clean the database before each test
@@ -79,28 +82,47 @@ class MemoryControllerIntegrationTest {
             )
         )
 
+        // Create another test user
+        otherUserId = UUID.randomUUID()
+        jpaUserStore.save(
+            DbUser(
+                id = otherUserId,
+                pseudo = "otherUser",
+                email = "other@example.com"
+            )
+        )
+
         // Insert test data
         memoryId1 = UUID.randomUUID()
         memoryId2 = UUID.randomUUID()
+        otherUserMemoryId = UUID.randomUUID()
 
         jpaMemoryStore.saveAll(
             listOf(
                 DbMemory(
                     id = memoryId1,
                     text = "Memory 1 text",
-                    day = today
+                    day = today,
+                    userId = userId
                 ),
                 DbMemory(
                     id = memoryId2,
                     text = "Memory 2 text",
-                    day = yesterday
+                    day = yesterday,
+                    userId = userId
+                ),
+                DbMemory(
+                    id = otherUserMemoryId,
+                    text = "Other user's memory",
+                    day = today,
+                    userId = otherUserId
                 )
             )
         )
     }
 
     @Test
-    fun `should return all memories when getAllMemories is called`() {
+    fun `should return only user's memories when getAllMemories is called`() {
         // When
         val result = mockMvc.perform(
             get("/memories")
@@ -116,6 +138,7 @@ class MemoryControllerIntegrationTest {
         val memories: List<MemoryDto> = objectMapper.readValue(result.response.contentAsString)
 
         // Validate the response using direct object equality comparison
+        // Should only contain the memories belonging to the authenticated user
         assertThat(memories).containsExactlyInAnyOrder(
             MemoryDto(
                 id = Id.of<Memory>(memoryId1),
@@ -128,6 +151,9 @@ class MemoryControllerIntegrationTest {
                 day = yesterday
             )
         )
+
+        // Verify that the other user's memory is not included
+        assertThat(memories).noneMatch { it.id == Id.of<Memory>(otherUserMemoryId) }
     }
 
     @Test
@@ -154,8 +180,8 @@ class MemoryControllerIntegrationTest {
 
         // Verify the memory was saved to the database
         val memories = jpaMemoryStore.findAll()
-        assertThat(memories).hasSize(3)
-        assertThat(memories.any { it.text == "New memory text" && it.day == today }).isTrue()
+        assertThat(memories).hasSize(4) // 3 existing memories + 1 new memory
+        assertThat(memories.any { it.text == "New memory text" && it.day == today && it.userId == userId }).isTrue()
 
         // Verify that the URI in the location header can be used to retrieve the newly created memory
         val getMemoryResult = mockMvc.perform(
@@ -279,9 +305,14 @@ class MemoryControllerIntegrationTest {
         assertThat(deletedMemory).isNull()
 
         // Verify that only one memory was deleted
-        val remainingMemories = jpaMemoryStore.findAll()
+        val remainingMemories = jpaMemoryStore.findAllByUserId(userId)
         assertThat(remainingMemories).hasSize(1)
         assertThat(remainingMemories[0].id).isEqualTo(memoryId2)
+
+        // Verify that the other user's memory was not deleted
+        val otherUserMemories = jpaMemoryStore.findAllByUserId(otherUserId)
+        assertThat(otherUserMemories).hasSize(1)
+        assertThat(otherUserMemories[0].id).isEqualTo(otherUserMemoryId)
     }
 
     @Test
@@ -299,8 +330,12 @@ class MemoryControllerIntegrationTest {
             .andExpect(status().isNoContent)
 
         // Verify that no memories were deleted
-        val remainingMemories = jpaMemoryStore.findAll()
-        assertThat(remainingMemories).hasSize(2)
+        val userMemories = jpaMemoryStore.findAllByUserId(userId)
+        assertThat(userMemories).hasSize(2)
+
+        // Verify that the other user's memory was not deleted
+        val otherUserMemories = jpaMemoryStore.findAllByUserId(otherUserId)
+        assertThat(otherUserMemories).hasSize(1)
     }
 
     @Test

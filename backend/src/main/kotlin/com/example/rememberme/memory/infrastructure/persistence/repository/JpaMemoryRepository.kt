@@ -5,12 +5,19 @@ import com.example.rememberme.memory.domain.MemoryText
 import com.example.rememberme.memory.domain.spi.MemoryRepository
 import com.example.rememberme.memory.infrastructure.persistence.model.DbMemory
 import com.example.rememberme.shared.domain.Id
+import com.example.rememberme.user.domain.User
 import org.springframework.stereotype.Component
 
 @Component
 class JpaMemoryRepository(private val jpaMemoryStore: JpaMemoryStore) : MemoryRepository {
     override fun findAll(): List<Memory> {
         return jpaMemoryStore.findAll().map {
+            toDomain(it)
+        }
+    }
+
+    override fun findByUserId(userId: Id<User>): List<Memory> {
+        return jpaMemoryStore.findAllByUserId(userId.value).map {
             toDomain(it)
         }
     }
@@ -25,7 +32,8 @@ class JpaMemoryRepository(private val jpaMemoryStore: JpaMemoryStore) : MemoryRe
         jpaMemoryStore.save(DbMemory(
             id = memory.id.value,
             text = memory.text.value,
-            day = memory.day
+            day = memory.day,
+            userId = memory.userId.value
         ))
     }
 
@@ -38,6 +46,7 @@ class JpaMemoryRepository(private val jpaMemoryStore: JpaMemoryStore) : MemoryRe
     private fun toDomain(memory: DbMemory): Memory = Memory(
         id = Id(memory.id),
         text = MemoryText(memory.text),
-        day = memory.day
+        day = memory.day,
+        userId = Id(memory.userId)
     )
 }

@@ -11,8 +11,11 @@ import com.example.rememberme.memory.domain.usecase.GetMemoriesUseCase
 import com.example.rememberme.memory.domain.usecase.GetMemoryUseCase
 import com.example.rememberme.memory.domain.usecase.UpdateMemoryUseCase
 import com.example.rememberme.shared.domain.Id
+import com.example.rememberme.user.domain.User
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.core.annotation.AuthenticationPrincipal
+import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -38,12 +41,15 @@ class MemoryController(
 ) {
 
     @GetMapping
-    fun getAllMemories(): List<MemoryDto> = memoriesUseCase.findAll().map { memory ->
-        MemoryDto(
-            id = memory.id,
-            text = memory.text.value,
-            day = memory.day
-        )
+    fun getAllMemories(@AuthenticationPrincipal userDetails: UserDetails): List<MemoryDto> {
+        val userId = UUID.fromString(userDetails.username)
+        return memoriesUseCase.findByUserId(Id.of<User>(userId)).map { memory ->
+            MemoryDto(
+                id = memory.id,
+                text = memory.text.value,
+                day = memory.day
+            )
+        }
     }
 
     @GetMapping("/{id}")
@@ -64,12 +70,15 @@ class MemoryController(
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     fun createMemory(
-        @RequestBody request: CreateMemoryRequestDto
+        @RequestBody request: CreateMemoryRequestDto,
+        @AuthenticationPrincipal userDetails: UserDetails
     ): ResponseEntity<Void> {
+        val userId = UUID.fromString(userDetails.username)
         val newMemory = Memory(
             id = Id.random(),
             text = MemoryText(request.text),
-            day = request.day
+            day = request.day,
+            userId = Id.of<User>(userId)
         )
         createMemoryUseCase.create(newMemory)
 
@@ -88,13 +97,16 @@ class MemoryController(
     @PutMapping("/{id}")
     fun updateMemory(
         @PathVariable id: UUID,
-        @RequestBody request: UpdateMemoryRequestDto
+        @RequestBody request: UpdateMemoryRequestDto,
+        @AuthenticationPrincipal userDetails: UserDetails
     ): ResponseEntity<Void> {
         return getMemoryUseCase.findById(Id.of<Memory>(id))?.let { existingMemory ->
+            val userId = UUID.fromString(userDetails.username)
             val updatedMemory = Memory(
                 id = existingMemory.id,
                 text = MemoryText(request.text),
-                day = request.day
+                day = request.day,
+                userId = Id.of<User>(userId)
             )
             updateMemoryUseCase.update(updatedMemory)
             ResponseEntity.noContent().build()
@@ -106,7 +118,10 @@ class MemoryController(
     }
 
     @DeleteMapping("/{id}")
-    fun deleteMemory(@PathVariable id: UUID): ResponseEntity<Void> {
+    fun deleteMemory(
+        @PathVariable id: UUID,
+        @AuthenticationPrincipal userDetails: UserDetails
+    ): ResponseEntity<Void> {
         deleteMemoryUseCase.delete(Id.of<Memory>(id))
         return ResponseEntity.noContent().build()
     }

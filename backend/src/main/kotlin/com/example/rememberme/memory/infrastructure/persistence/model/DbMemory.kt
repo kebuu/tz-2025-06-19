@@ -12,5 +12,6 @@ data class DbMemory(
     @Id
     val id: UUID,
     val text: String,
-    val day: LocalDate
+    val day: LocalDate,
+    val userId: UUID
 )
