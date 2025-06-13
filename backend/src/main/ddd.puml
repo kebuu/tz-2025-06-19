@@ -1,0 +1,16 @@
+@startuml
+skinparam shadowing true
+skinparam roundcorner 20
+skinparam ArrowColor #33658A
+skinparam ArrowThickness 2
+skinparam BackgroundColor transparent
+skinparam NodeFontSize 18
+skinparam NodeFontStyle bold
+skinparam NodeFontColor #333333
+
+node "Langage" as L #F6AE2D
+node "Modèle" as M #F26419
+
+L -down-> M : Influence
+M -up-> L : Influence
+@enduml

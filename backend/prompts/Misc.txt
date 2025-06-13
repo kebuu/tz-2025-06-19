@@ -1,0 +1,2 @@
+Peux tu me faire un schéma avec le mot "Langage" et le mot "Modèle" tout deux pointant l'autre par une flèche formant ainsi une boucle
+
