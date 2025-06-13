@@ -48,7 +48,7 @@ class MemoryController(
 
     @GetMapping("/{id}")
     fun getMemory(@PathVariable id: UUID): ResponseEntity<MemoryDto> {
-        return getMemoryUseCase.findById(Id.Companion.of(id))
+        return getMemoryUseCase.findById(Id.of(id))
             ?.let { memory ->
                 ResponseEntity.ok(
                     MemoryDto(
@@ -67,7 +67,7 @@ class MemoryController(
         @RequestBody request: CreateMemoryRequestDto
     ): ResponseEntity<Void> {
         val newMemory = Memory(
-            id = Id.Companion.random(),
+            id = Id.random(),
             text = MemoryText(request.text),
             day = request.day
         )
@@ -90,26 +90,24 @@ class MemoryController(
         @PathVariable id: UUID,
         @RequestBody request: UpdateMemoryRequestDto
     ): ResponseEntity<Void> {
-        val memoryId = Id.Companion.of<Memory>(id)
-        val existingMemory = getMemoryUseCase.findById(memoryId)
-            ?: return ResponseEntity.notFound().build()
+        return getMemoryUseCase.findById(Id.of<Memory>(id))?.let { existingMemory ->
+            val updatedMemory = Memory(
+                id = existingMemory.id,
+                text = MemoryText(request.text),
+                day = request.day
+            )
+            updateMemoryUseCase.update(updatedMemory)
+            ResponseEntity.noContent().build()
+        }
+        ?: ResponseEntity.notFound().build()
 
-        val updatedMemory = Memory(
-            id = existingMemory.id,
-            text = MemoryText(request.text),
-            day = request.day
-        )
-        updateMemoryUseCase.update(updatedMemory)
-        return ResponseEntity.noContent().build()
+
+
     }
 
     @DeleteMapping("/{id}")
     fun deleteMemory(@PathVariable id: UUID): ResponseEntity<Void> {
-        val memoryId = Id.Companion.of<Memory>(id)
-        val existingMemory = getMemoryUseCase.findById(memoryId)
-            ?: return ResponseEntity.notFound().build()
-
-        deleteMemoryUseCase.delete(memoryId)
+        deleteMemoryUseCase.delete(Id.of<Memory>(id))
         return ResponseEntity.noContent().build()
     }
 }
