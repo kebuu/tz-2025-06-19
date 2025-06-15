@@ -2,15 +2,16 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { User } from '../../models/user.model';
+import { User, CreateUserRequest } from '../../models/user.model';
 import { AppState } from '../../store/app.state';
-import { loadUsers } from '../../store/user/user.actions';
+import { loadUsers, createUser } from '../../store/user/user.actions';
 import { selectAllUsers, selectUsersLoading, selectUsersError } from '../../store/user/user.selectors';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-users',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ReactiveFormsModule],
   template: `
     <div class="max-w-7xl mx-auto">
       <div class="mb-8">
@@ -22,7 +23,7 @@ import { selectAllUsers, selectUsersLoading, selectUsersError } from '../../stor
         <div class="px-6 py-4 border-b border-gray-200">
           <div class="flex items-center justify-between">
             <h2 class="text-lg font-semibold text-gray-900">Liste des utilisateurs</h2>
-            <button class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors">
+            <button (click)="openAddUserModal()" class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors">
               Ajouter un utilisateur
             </button>
           </div>
@@ -102,6 +103,77 @@ import { selectAllUsers, selectUsersLoading, selectUsersError } from '../../stor
         </div>
       </div>
     </div>
+
+    <!-- Modal pour ajouter un utilisateur -->
+    <div *ngIf="showModal" class="fixed inset-0 flex items-center justify-center z-50">
+      <div class="absolute inset-0 bg-black opacity-50" (click)="closeModal()"></div>
+      <div class="bg-white rounded-lg shadow-lg w-full max-w-md z-10 relative">
+        <div class="px-6 py-4 border-b border-gray-200">
+          <div class="flex items-center justify-between">
+            <h3 class="text-lg font-semibold text-gray-900">Ajouter un nouvel utilisateur</h3>
+            <button (click)="closeModal()" class="text-gray-400 hover:text-gray-500">
+              <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <form [formGroup]="userForm" (ngSubmit)="submitForm()" class="p-6">
+          <div class="mb-4">
+            <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Adresse email</label>
+            <input
+              type="email"
+              id="email"
+              formControlName="email"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+              placeholder="email@exemple.com"
+            />
+            <div *ngIf="userForm.get('email')?.invalid && userForm.get('email')?.touched" class="mt-1 text-sm text-red-600">
+              Email invalide
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label for="pseudo" class="block text-sm font-medium text-gray-700 mb-1">Pseudo</label>
+            <input
+              type="text"
+              id="pseudo"
+              formControlName="pseudo"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+              placeholder="Votre pseudo"
+            />
+            <div *ngIf="userForm.get('pseudo')?.invalid && userForm.get('pseudo')?.touched" class="mt-1 text-sm text-red-600">
+              Pseudo requis (minimum 3 caractères)
+            </div>
+          </div>
+
+          <div *ngIf="error$ | async as error" class="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+            <p class="text-sm text-red-600">{{ error }}</p>
+          </div>
+
+          <div class="flex justify-end space-x-3 mt-6">
+            <button
+              type="button"
+              (click)="closeModal()"
+              class="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+            >
+              Annuler
+            </button>
+            <button
+              type="submit"
+              class="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <div *ngIf="isSubmitting" class="flex items-center">
+                <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                Traitement...
+              </div>
+              <span *ngIf="!isSubmitting">Sauvegarder</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   `
 })
 export class UsersComponent implements OnInit {
@@ -109,13 +181,64 @@ export class UsersComponent implements OnInit {
   loading$: Observable<boolean>;
   error$: Observable<string | null>;
 
-  constructor(private store: Store<AppState>) {
+  userForm: FormGroup;
+  showModal = false;
+  isSubmitting = false;
+
+  constructor(
+    private store: Store<AppState>,
+    private fb: FormBuilder
+  ) {
     this.users$ = this.store.select(selectAllUsers);
     this.loading$ = this.store.select(selectUsersLoading);
     this.error$ = this.store.select(selectUsersError);
+
+    // S'abonner aux actions pour gérer la création d'utilisateur
+    this.store.select(state => state.user).subscribe(userState => {
+      if (!userState.loading && this.isSubmitting) {
+        if (!userState.error) {
+          // Création réussie
+          this.isSubmitting = false;
+          this.closeModal();
+          this.store.dispatch(loadUsers());
+        } else {
+          // Erreur lors de la création
+          this.isSubmitting = false;
+          // Laisser le modal ouvert pour correction
+        }
+      }
+    });
+
+    this.userForm = this.fb.group({
+      email: ['', [Validators.required, Validators.email]],
+      pseudo: ['', [Validators.required, Validators.minLength(3)]]
+    });
   }
 
   ngOnInit() {
     this.store.dispatch(loadUsers());
+  }
+
+  openAddUserModal() {
+    this.showModal = true;
+    this.userForm.reset();
+  }
+
+  closeModal() {
+    this.showModal = false;
+  }
+
+  submitForm() {
+    console.log(this.userForm.value);
+    if (this.userForm.invalid) return;
+
+    this.isSubmitting = true;
+    const userData: CreateUserRequest = {
+      email: this.userForm.value.email,
+      pseudo: this.userForm.value.pseudo
+    };
+
+    this.store.dispatch(createUser({ user: userData }));
+    // Le reste est géré par l'abonnement au store dans le constructeur
   }
 }

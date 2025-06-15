@@ -41,19 +41,16 @@ export class UserEffects {
       ofType(UserActions.createUser),
       mergeMap(action =>
         this.userService.createUser(action.user).pipe(
-          map(() => {
-            // Since the backend returns void, we need to create a mock user response
-            // In a real scenario, the backend should return the created user
-            const mockUser = {
-              id: { value: 'temp-id' },
-              email: { value: action.user.email },
-              pseudo: { value: action.user.pseudo }
-            };
-            return UserActions.createUserSuccess({ user: mockUser });
+          map(user => {
+            console.log('Utilisateur créé avec succès:', user);
+            return UserActions.createUserSuccess({ user });
           }),
-          catchError(error => of(UserActions.createUserFailure({ 
-            error: error.message || 'Erreur lors de la création de l\'utilisateur' 
-          })))
+          catchError(error => {
+            console.error('Erreur lors de la création de l\'utilisateur:', error);
+            return of(UserActions.createUserFailure({ 
+              error: error.message || 'Erreur lors de la création de l\'utilisateur' 
+            }));
+          })
         )
       )
     )

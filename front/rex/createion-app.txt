@@ -37,3 +37,10 @@ backend avec celle du frontend qui sont presente dans le dossier front
 
 il fait quelque modification, pour leurs permettre de communiquer
 petite erreur sur la la modifiction de la requestMap il ajoute API mais pas obligatoire
+
+
+######
+Peut tu fait marcher le bouton "Ajouter un utilisateur" quand on click desuis celui-ci doit
+pour permettre d'ajouter un User pour le moment il ne fait rien
+
+Il ajoute une modal et fait les modiication utilile et mit des erreur dans le formulaire
