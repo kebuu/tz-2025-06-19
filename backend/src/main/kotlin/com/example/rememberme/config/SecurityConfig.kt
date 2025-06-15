@@ -22,6 +22,8 @@ class SecurityConfig(private val userRepository: UserRepository) {
             .csrf { it.disable() }
             .authorizeHttpRequests { authorize ->
                 authorize
+                    // Swagger UI and OpenAPI endpoints
+                    .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                     .requestMatchers("/memories/**").authenticated()
                     .anyRequest().permitAll()
             }
@@ -35,15 +37,15 @@ class SecurityConfig(private val userRepository: UserRepository) {
             // Convert the username (which is a user ID) to a UUID
             val userId = try {
                 java.util.UUID.fromString(username)
-            } catch (e: IllegalArgumentException) {
+            } catch (_: IllegalArgumentException) {
                 null
             }
-            
+
             // Find the user by ID
             val user = userId?.let { id ->
                 userRepository.findById(Id(id))
             }
-            
+
             // If the user exists, create a UserDetails object with the fixed password
             if (user != null) {
                 User.builder()
