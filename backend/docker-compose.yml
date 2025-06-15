@@ -1,6 +1,21 @@
 version: '3.8'
 
 services:
+  backend:
+    image: rememberme-backend:latest
+    container_name: rememberme-backend
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/rememberme
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+    depends_on:
+      - postgres
+    restart: unless-stopped
+    networks:
+      - rememberme-network
+
   postgres:
     image: postgres:17.5
     container_name: rememberme-postgres
