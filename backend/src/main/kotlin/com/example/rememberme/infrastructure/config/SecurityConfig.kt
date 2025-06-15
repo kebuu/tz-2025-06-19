@@ -1,4 +1,4 @@
-package com.example.rememberme.config
+package com.example.rememberme.infrastructure.config
 
 import com.example.rememberme.shared.domain.Id
 import com.example.rememberme.user.domain.spi.UserRepository
@@ -8,9 +8,11 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetailsService
+import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.crypto.password.NoOpPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.SecurityFilterChain
+import java.util.UUID
 
 @Configuration
 @EnableWebSecurity
@@ -36,7 +38,7 @@ class SecurityConfig(private val userRepository: UserRepository) {
         return UserDetailsService { username ->
             // Convert the username (which is a user ID) to a UUID
             val userId = try {
-                java.util.UUID.fromString(username)
+                UUID.fromString(username)
             } catch (_: IllegalArgumentException) {
                 null
             }
@@ -54,7 +56,7 @@ class SecurityConfig(private val userRepository: UserRepository) {
                     .roles("USER")
                     .build()
             } else {
-                throw org.springframework.security.core.userdetails.UsernameNotFoundException("User not found")
+                throw UsernameNotFoundException("User not found")
             }
         }
     }
