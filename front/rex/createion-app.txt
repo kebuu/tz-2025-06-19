@@ -44,3 +44,17 @@ Peut tu fait marcher le bouton "Ajouter un utilisateur" quand on click desuis ce
 pour permettre d'ajouter un User pour le moment il ne fait rien
 
 Il ajoute une modal et fait les modiication utilile et mit des erreur dans le formulaire
+
+######
+
+Peut tu faire fontionner le tableaux d'affichage des utilisateurs
+
+Il par en vrille et fait un intercepeur je prend pas les modif et refait un prompte
+
+######
+
+Dans le fichier user.component l'affichage dans le tableaux n'est
+pas correct, il faut le corriger pour que l'email et pseudo des
+utilisateur soit afficher correctement d'apres le retour de l'aPI en utilisant le store
+
+Bon plus d'erreur dans la console mais ça ne marche aps encore correctement, mais il a au moins fait disparaitre l'erreur dans la console

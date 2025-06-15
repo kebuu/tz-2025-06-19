@@ -46,7 +46,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
           </div>
           
           <div *ngIf="!(loading$ | async) && !(error$ | async)">
-            <div *ngIf="(users$ | async)?.length === 0" class="text-center py-8">
+            <div *ngIf="!(users$ | async)?.length" class="text-center py-8">
               <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
               </svg>
@@ -77,19 +77,19 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
                     <td class="px-6 py-4 whitespace-nowrap">
                       <div class="flex items-center">
                         <div class="w-10 h-10 bg-primary-500 rounded-full flex items-center justify-center">
-                          <span class="text-white text-sm font-medium">{{ user.pseudo.value.charAt(0).toUpperCase() }}</span>
+                          <span class="text-white text-sm font-medium">{{ user.pseudo?.value?.charAt(0)?.toUpperCase() || '?' }}</span>
                         </div>
                         <div class="ml-4">
-                          <div class="text-sm font-medium text-gray-900">{{ user.pseudo.value }}</div>
-                          <div class="text-sm text-gray-500">ID: {{ user.id.value }}</div>
+                          <div class="text-sm font-medium text-gray-900">{{ user.pseudo?.value || 'Sans nom' }}</div>
+                          <div class="text-sm text-gray-500">ID: {{ user.id?.value || 'inconnu' }}</div>
                         </div>
                       </div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                      <div class="text-sm text-gray-900">{{ user.email.value }}</div>
+                      <div class="text-sm text-gray-900">{{ user.email?.value || 'Pas d\'email' }}</div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                      <div class="text-sm text-gray-900">{{ user.pseudo.value }}</div>
+                      <div class="text-sm text-gray-900">{{ user.pseudo?.value || 'Sans pseudo' }}</div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <button class="text-primary-600 hover:text-primary-900 mr-4">Modifier</button>
@@ -217,6 +217,11 @@ export class UsersComponent implements OnInit {
 
   ngOnInit() {
     this.store.dispatch(loadUsers());
+
+    // Débogage des utilisateurs
+    this.users$.subscribe(users => {
+      console.log('Utilisateurs dans le composant:', users);
+    });
   }
 
   openAddUserModal() {

@@ -13,10 +13,16 @@ export class UserEffects {
       ofType(UserActions.loadUsers),
       mergeMap(() =>
         this.userService.getUsers().pipe(
-          map(users => UserActions.loadUsersSuccess({ users })),
-          catchError(error => of(UserActions.loadUsersFailure({ 
-            error: error.message || 'Erreur lors du chargement des utilisateurs' 
-          })))
+          map(users => {
+            console.log('Utilisateurs reçus de l\'API:', users);
+            return UserActions.loadUsersSuccess({ users });
+          }),
+          catchError(error => {
+            console.error('Erreur lors du chargement des utilisateurs:', error);
+            return of(UserActions.loadUsersFailure({ 
+              error: error.message || 'Erreur lors du chargement des utilisateurs' 
+            }));
+          })
         )
       )
     )
