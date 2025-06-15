@@ -8,3 +8,6 @@ Le login d'un utilisateur est son id, le password est le même pour tous les uti
 
 The last test method has been updated to include Basic authentication in each request. The changes have been successfully applied to the test file.
 
+#####################################
+
+Modifie la configuration d'open api pour qu'il soit possible de donner les informations d'identification directement dans l'interface du swagger
