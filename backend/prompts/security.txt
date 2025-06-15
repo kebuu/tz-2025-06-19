@@ -11,3 +11,7 @@ The last test method has been updated to include Basic authentication in each re
 #####################################
 
 Modifie la configuration d'open api pour qu'il soit possible de donner les informations d'identification directement dans l'interface du swagger
+
+#####################################
+
+Pb de récupération des informations de securité dans le pom

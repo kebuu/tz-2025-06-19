@@ -14,6 +14,10 @@
 * Do not create documentation for classes nor functions expect if asked
 * When working on a specific task, do not refactor code not related to the task
 
+## Maven
+* When adding or updating version of dependencies or plugins in pom.xml, 
+always try to store version numbers as properties
+
 ## Refactoring
 * When moving or renaming files, use IDE refactoring tools
 
