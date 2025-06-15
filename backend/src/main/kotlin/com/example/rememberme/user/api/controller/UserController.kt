@@ -24,7 +24,7 @@ import java.util.UUID
 import kotlin.reflect.jvm.javaMethod
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/users")
 @CrossOrigin(origins = ["http://localhost:4200"])
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
 class UserController(
