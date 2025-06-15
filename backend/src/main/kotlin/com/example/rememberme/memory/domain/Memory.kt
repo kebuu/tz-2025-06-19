@@ -9,7 +9,9 @@ data class Memory(
     val text: MemoryText,
     val day: LocalDate,
     val userId: Id<User>
-)
+) {
+    fun hasOwnerId(ownerId: Id<User>): Boolean = userId == ownerId
+}
 
 @JvmInline
 value class MemoryText(val value: String) {

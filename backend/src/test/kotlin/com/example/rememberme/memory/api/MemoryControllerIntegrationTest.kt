@@ -245,6 +245,18 @@ class MemoryControllerIntegrationTest {
     }
 
     @Test
+    fun `should return 404 when getMemory is called with id of memory belonging to another user`() {
+        // When
+        mockMvc.perform(
+            get("/memories/${otherUserMemoryId}")
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(basicAuth(userId.toString(), "zenika"))
+        )
+            // Then
+            .andExpect(status().isNotFound)
+    }
+
+    @Test
     fun `should update a memory when updateMemory is called with valid id`() {
         // Given
         val updateMemoryRequest = UpdateMemoryRequestDto(
@@ -290,6 +302,31 @@ class MemoryControllerIntegrationTest {
     }
 
     @Test
+    fun `should return 404 when updateMemory is called with id of memory belonging to another user`() {
+        // Given
+        val updateMemoryRequest = UpdateMemoryRequestDto(
+            text = "Trying to update another user's memory",
+            day = yesterday
+        )
+
+        // When
+        mockMvc.perform(
+            put("/memories/${otherUserMemoryId}")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateMemoryRequest))
+                .with(basicAuth(userId.toString(), "zenika"))
+        )
+            // Then
+            .andExpect(status().isNotFound)
+
+        // Verify the memory was not updated in the database
+        val memory = jpaMemoryStore.findMemoryById(otherUserMemoryId)
+        assertThat(memory).isNotNull
+        assertThat(memory?.text).isEqualTo("Other user's memory")
+        assertThat(memory?.day).isEqualTo(today)
+    }
+
+    @Test
     fun `should delete a memory when deleteMemory is called with valid id`() {
         // When
         mockMvc.perform(
@@ -316,7 +353,7 @@ class MemoryControllerIntegrationTest {
     }
 
     @Test
-    fun `should return 204 when deleteMemory is called with non-existent id`() {
+    fun `should return 404 when deleteMemory is called with non-existent id`() {
         // Given
         val nonExistentId = UUID.randomUUID()
 
@@ -327,13 +364,37 @@ class MemoryControllerIntegrationTest {
                 .with(basicAuth(userId.toString(), "zenika"))
         )
             // Then
-            .andExpect(status().isNoContent)
+            .andExpect(status().isNotFound)
 
         // Verify that no memories were deleted
         val userMemories = jpaMemoryStore.findAllByUserId(userId)
         assertThat(userMemories).hasSize(2)
 
         // Verify that the other user's memory was not deleted
+        val otherUserMemories = jpaMemoryStore.findAllByUserId(otherUserId)
+        assertThat(otherUserMemories).hasSize(1)
+    }
+
+    @Test
+    fun `should return 404 when deleteMemory is called with id of memory belonging to another user`() {
+        // When
+        mockMvc.perform(
+            delete("/memories/${otherUserMemoryId}")
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(basicAuth(userId.toString(), "zenika"))
+        )
+            // Then
+            .andExpect(status().isNotFound)
+
+        // Verify that the memory was not deleted from the database
+        val memory = jpaMemoryStore.findMemoryById(otherUserMemoryId)
+        assertThat(memory).isNotNull
+
+        // Verify that no user memories were deleted
+        val userMemories = jpaMemoryStore.findAllByUserId(userId)
+        assertThat(userMemories).hasSize(2)
+
+        // Verify that all other user memories are still there
         val otherUserMemories = jpaMemoryStore.findAllByUserId(otherUserId)
         assertThat(otherUserMemories).hasSize(1)
     }

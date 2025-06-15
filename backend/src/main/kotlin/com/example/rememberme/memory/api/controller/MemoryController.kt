@@ -6,8 +6,10 @@ import com.example.rememberme.memory.api.dto.UpdateMemoryRequestDto
 import com.example.rememberme.memory.domain.Memory
 import com.example.rememberme.memory.domain.MemoryText
 import com.example.rememberme.memory.domain.usecase.CreateMemoryUseCase
+import com.example.rememberme.memory.domain.usecase.DeleteMemoryInput
 import com.example.rememberme.memory.domain.usecase.DeleteMemoryUseCase
 import com.example.rememberme.memory.domain.usecase.GetMemoriesUseCase
+import com.example.rememberme.memory.domain.usecase.GetMemoryInput
 import com.example.rememberme.memory.domain.usecase.GetMemoryUseCase
 import com.example.rememberme.memory.domain.usecase.UpdateMemoryUseCase
 import com.example.rememberme.shared.domain.Id
@@ -53,8 +55,16 @@ class MemoryController(
     }
 
     @GetMapping("/{id}")
-    fun getMemory(@PathVariable id: UUID): ResponseEntity<MemoryDto> {
-        return getMemoryUseCase.execute(Id.of(id))
+    fun getMemory(
+        @PathVariable id: UUID,
+        @AuthenticationPrincipal userDetails: UserDetails
+    ): ResponseEntity<MemoryDto> {
+        val userId = UUID.fromString(userDetails.username)
+        val input = GetMemoryInput(
+            memoryId = Id.of(id),
+            userId = Id.of<User>(userId)
+        )
+        return getMemoryUseCase.execute(input)
             ?.let { memory ->
                 ResponseEntity.ok(
                     MemoryDto(
@@ -82,16 +92,18 @@ class MemoryController(
         )
         createMemoryUseCase.execute(newMemory)
 
-        return ResponseEntity.created(
-            MvcUriComponentsBuilder
-                .fromMethod(
-                    MemoryController::class.java,
-                    MemoryController::getMemory.javaMethod!!,
-                    newMemory.id.asString()
-                )
-                .build()
-                .toUri()
-        ).build()
+        // Create a URI for the new memory
+        val uri = MvcUriComponentsBuilder
+            .fromMethod(
+                MemoryController::class.java,
+                MemoryController::getMemory.javaMethod!!,
+                newMemory.id.asString(),
+                userDetails
+            )
+            .build()
+            .toUri()
+
+        return ResponseEntity.created(uri).build()
     }
 
     @PutMapping("/{id}")
@@ -100,21 +112,22 @@ class MemoryController(
         @RequestBody request: UpdateMemoryRequestDto,
         @AuthenticationPrincipal userDetails: UserDetails
     ): ResponseEntity<Void> {
-        return getMemoryUseCase.execute(Id.of<Memory>(id))?.let { existingMemory ->
-            val userId = UUID.fromString(userDetails.username)
+        val userId = Id.of<User>(UUID.fromString(userDetails.username))
+        val input = GetMemoryInput(
+            memoryId = Id.of(id),
+            userId = userId
+        )
+        return getMemoryUseCase.execute(input)?.let { existingMemory ->
             val updatedMemory = Memory(
                 id = existingMemory.id,
                 text = MemoryText(request.text),
                 day = request.day,
-                userId = Id.of<User>(userId)
+                userId = userId
             )
             updateMemoryUseCase.execute(updatedMemory)
             ResponseEntity.noContent().build()
         }
         ?: ResponseEntity.notFound().build()
-
-
-
     }
 
     @DeleteMapping("/{id}")
@@ -122,7 +135,17 @@ class MemoryController(
         @PathVariable id: UUID,
         @AuthenticationPrincipal userDetails: UserDetails
     ): ResponseEntity<Void> {
-        deleteMemoryUseCase.execute(Id.of<Memory>(id))
-        return ResponseEntity.noContent().build()
+        val userId = UUID.fromString(userDetails.username)
+        val userIdObj = Id.of<User>(userId)
+        val input = DeleteMemoryInput(
+            memoryId = Id.of(id),
+            userId = userIdObj
+        )
+
+        return deleteMemoryUseCase.execute(input)
+            .fold(
+                ifLeft = { ResponseEntity.notFound().build() } ,
+                ifRight = { ResponseEntity.noContent().build() }
+            )
     }
 }
