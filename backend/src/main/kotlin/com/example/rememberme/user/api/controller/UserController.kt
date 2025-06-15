@@ -18,12 +18,14 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder
 import java.util.UUID
 import kotlin.reflect.jvm.javaMethod
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/api/users")
+@CrossOrigin(origins = ["http://localhost:4200"])
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
 class UserController(
     val userUseCase: GetUsersUseCase,
@@ -59,13 +61,19 @@ class UserController(
     @ResponseStatus(HttpStatus.CREATED)
     fun createUser(
         @RequestBody request: CreateUserRequestDto
-    ): ResponseEntity<Void> {
+    ): ResponseEntity<UserDto> {
         val newUser = User(
             id = Id.Companion.random(),
             email = Email(request.email),
             pseudo = Pseudo(request.pseudo)
         )
         createUserUseCase.create(newUser)
+
+        val userDto = UserDto(
+            id = newUser.id,
+            email = newUser.email,
+            pseudo = newUser.pseudo
+        )
 
         return ResponseEntity.created(
             MvcUriComponentsBuilder
@@ -76,6 +84,6 @@ class UserController(
                 )
                 .build()
                 .toUri()
-        ).build()
+        ).body(userDto)
     }
 }

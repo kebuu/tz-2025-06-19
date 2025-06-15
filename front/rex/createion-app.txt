@@ -29,3 +29,10 @@ Il ajoute correctent l'acces a la page en reprenant le code existant
 
 Les store sont directement dans les composant pas de séparation claire
 tout est un peux melanger
+
+#######
+
+peut tu connecter les API User du backend prensente dans le dossier
+backend avec celle du frontend qui sont presente dans le dossier front
+
+il fait quelque modification, pour leurs permettre de communiquer
