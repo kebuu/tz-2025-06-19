@@ -5,7 +5,7 @@ import com.example.rememberme.memory.api.dto.MemoryDto
 import com.example.rememberme.memory.api.dto.UpdateMemoryRequestDto
 import com.example.rememberme.memory.domain.Memory
 import com.example.rememberme.memory.infrastructure.persistence.model.DbMemory
-import com.example.rememberme.memory.infrastructure.persistence.repository.JpaMemoryStore
+import com.example.rememberme.memory.infrastructure.persistence.store.JpaMemoryStore
 import com.example.rememberme.shared.domain.Id
 import com.example.rememberme.user.infrastructure.persistence.model.DbUser
 import com.example.rememberme.user.infrastructure.persistence.repository.JpaUserStore
@@ -103,19 +103,22 @@ class MemoryControllerIntegrationTest {
                     id = memoryId1,
                     text = "Memory 1 text",
                     day = today,
-                    userId = userId
+                    userId = userId,
+                    userLinks = emptyList()
                 ),
                 DbMemory(
                     id = memoryId2,
                     text = "Memory 2 text",
                     day = yesterday,
-                    userId = userId
+                    userId = userId,
+                    userLinks = emptyList()
                 ),
                 DbMemory(
                     id = otherUserMemoryId,
                     text = "Other user's memory",
                     day = today,
-                    userId = otherUserId
+                    userId = otherUserId,
+                    userLinks = emptyList()
                 )
             )
         )

@@ -8,10 +8,33 @@ data class Memory(
     val id: Id<Memory>,
     val text: MemoryText,
     val day: LocalDate,
-    val ownerId: Id<User>
+    val ownerId: Id<User>,
+    val userLinks: List<MemoryUserLinkConfig>
 ) {
+    init {
+        checkOwnerIsNotInUserLinks()
+        checkNoUserLinkedMoreThanOnce()
+    }
+
     fun hasOwnerId(ownerId: Id<User>): Boolean = this.ownerId == ownerId
+
+    private fun checkOwnerIsNotInUserLinks() {
+        check(userLinks.none { it.userId == ownerId }) { "Owner cannot be linked to its memory" }
+    }
+
+    private fun checkNoUserLinkedMoreThanOnce() {
+        val firstDuplicateUserIdOrNull = userLinks
+            .groupBy { it.userId }
+            .filter { it.value.size > 1 }
+            .keys.firstOrNull()
+        check(firstDuplicateUserIdOrNull == null) { "User $firstDuplicateUserIdOrNull appears multiple times in memory links" }
+    }
 }
+
+data class MemoryUserLinkConfig(
+    val userId: Id<User>,
+    val userCanAccess: Boolean
+)
 
 @JvmInline
 value class MemoryText(val value: String) {

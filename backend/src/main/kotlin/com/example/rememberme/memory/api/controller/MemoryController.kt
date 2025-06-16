@@ -8,6 +8,7 @@ import com.example.rememberme.memory.domain.MemoryText
 import com.example.rememberme.memory.domain.usecase.CreateMemoryUseCase
 import com.example.rememberme.memory.domain.usecase.DeleteMemoryInput
 import com.example.rememberme.memory.domain.usecase.DeleteMemoryUseCase
+import com.example.rememberme.memory.domain.usecase.GetLinkedMemoriesUseCase
 import com.example.rememberme.memory.domain.usecase.GetMemoriesUseCase
 import com.example.rememberme.memory.domain.usecase.GetMemoryInput
 import com.example.rememberme.memory.domain.usecase.GetMemoryUseCase
@@ -47,7 +48,8 @@ class MemoryController(
     val getMemoryUseCase: GetMemoryUseCase,
     val createMemoryUseCase: CreateMemoryUseCase,
     val updateMemoryUseCase: UpdateMemoryUseCase,
-    val deleteMemoryUseCase: DeleteMemoryUseCase
+    val deleteMemoryUseCase: DeleteMemoryUseCase,
+    val getLinkedMemoriesUseCase: GetLinkedMemoriesUseCase
 ) {
 
     @GetMapping
@@ -113,7 +115,8 @@ class MemoryController(
             id = Id.random(),
             text = MemoryText(request.text),
             day = request.day,
-            ownerId = Id.of<User>(userId)
+            ownerId = Id.of<User>(userId),
+            userLinks = emptyList()
         )
         createMemoryUseCase.execute(newMemory)
 
@@ -153,12 +156,30 @@ class MemoryController(
                 id = existingMemory.id,
                 text = MemoryText(request.text),
                 day = request.day,
-                ownerId = userId
+                ownerId = userId,
+                userLinks = existingMemory.userLinks
             )
             updateMemoryUseCase.execute(updatedMemory)
             ResponseEntity.noContent().build()
         }
         ?: ResponseEntity.notFound().build()
+    }
+
+    @GetMapping("/linked")
+    @Operation(summary = "Get linked memories", description = "Retrieves all memories where the authenticated user is linked and has access")
+    @ApiResponses(value = [
+        ApiResponse(responseCode = "200", description = "Successfully retrieved linked memories",
+            content = [Content(mediaType = "application/json", schema = Schema(implementation = MemoryDto::class))])
+    ])
+    fun getLinkedMemories(@AuthenticationPrincipal userDetails: UserDetails): List<MemoryDto> {
+        val userId = UUID.fromString(userDetails.username)
+        return getLinkedMemoriesUseCase.execute(Id.of<User>(userId)).map { memory ->
+            MemoryDto(
+                id = memory.id,
+                text = memory.text.value,
+                day = memory.day
+            )
+        }
     }
 
     @DeleteMapping("/{id}")
