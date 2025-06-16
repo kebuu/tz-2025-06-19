@@ -1,0 +1,25 @@
+Voici la description de la fonctionnalité : Social memory
+
+1. Un souvenir (memory) peux désormais être lié à d'autres utilisateurs en plus de son propriétaire
+2. Pour ces nouveaux type de lien entre un utilisateur et un souvenir il est possible d'indiquer si l'utilisateur ciblé peux accéder à ce souvenir qui ne lui appartient pas ou pas
+3. Pour un utilisateur identifié, il faut pouvoir récupérer  la liste des souvenirs dont il n'est pas propriétaire mais auxquels il est lié et qui lui sont partagés
+4. Un souvenir ne peut pas être lié de cette manière son propre propriétaire
+
+Voici quelques exemples :
+
+Soit deux utilisateurs 'user1' et 'user2' d'id respectif 'userId1' et 'userId2', ainsi que deux souvenirs 'memory11' et 'memory12' dont user1 est propriétaire
+
+
+Exemple 1 :
+* memory11 est lié à user2 mais user1 ne l'a pas rendu visible pour user2 -> alors user2 ne verra pas memory11 dans la liste des souvenirs auxquels il est lié
+
+Exemple 2 :
+* memory11 est lié à user2 et  user1 l'a rendu visible pour user2 -> alors user2  verra  memory11 dans la liste des souvenirs auxquels il est lié
+
+Taches à effectuer :
+- implémente cette fonctionnalité dans le projet en t'inspirant de la structure existante
+- crée les tests unitaire et d'intégration nécessaire
+- prépare un message de commit résumant la fonctionnalité que tu viens de faire
+
+
+################################
