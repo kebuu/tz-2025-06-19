@@ -113,7 +113,7 @@ class MemoryController(
             id = Id.random(),
             text = MemoryText(request.text),
             day = request.day,
-            userId = Id.of<User>(userId)
+            ownerId = Id.of<User>(userId)
         )
         createMemoryUseCase.execute(newMemory)
 
@@ -153,7 +153,7 @@ class MemoryController(
                 id = existingMemory.id,
                 text = MemoryText(request.text),
                 day = request.day,
-                userId = userId
+                ownerId = userId
             )
             updateMemoryUseCase.execute(updatedMemory)
             ResponseEntity.noContent().build()

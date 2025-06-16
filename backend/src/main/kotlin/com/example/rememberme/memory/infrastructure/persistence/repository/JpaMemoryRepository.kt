@@ -27,7 +27,7 @@ class JpaMemoryRepository(private val jpaMemoryStore: JpaMemoryStore) : MemoryRe
             id = memory.id.value,
             text = memory.text.value,
             day = memory.day,
-            userId = memory.userId.value
+            userId = memory.ownerId.value
         ))
     }
 
@@ -41,6 +41,6 @@ class JpaMemoryRepository(private val jpaMemoryStore: JpaMemoryStore) : MemoryRe
         id = Id(memory.id),
         text = MemoryText(memory.text),
         day = memory.day,
-        userId = Id(memory.userId)
+        ownerId = Id(memory.userId)
     )
 }
