@@ -36,7 +36,6 @@ class JpaMemoryRepository(
             day = memory.day,
             userId = memory.ownerId.value,
             userLinks = memory.userLinks.map { DbMemoryUserLink(
-                memoryId = memory.id.value,
                 userId = it.userId.value,
                 userCanAccess = it.userCanAccess
             )

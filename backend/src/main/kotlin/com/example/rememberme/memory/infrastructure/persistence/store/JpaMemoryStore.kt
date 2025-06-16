@@ -15,8 +15,9 @@ interface JpaMemoryStore : JpaRepository<DbMemory, UUID>, JpaSpecificationExecut
 
     @Query("""select memory 
         from DbMemory memory 
-        where memory.userLinks.userId = ?1 
-        and memory.userLinks.userCanAccess = true"""
+        join memory.userLinks link 
+        where link.userId = ?1 
+        and link.userCanAccess = true"""
     )
     fun findByLinkedUserWithGrantedAccess(id: UUID): List<DbMemory>
 }
