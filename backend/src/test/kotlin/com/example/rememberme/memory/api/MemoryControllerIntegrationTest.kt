@@ -5,6 +5,7 @@ import com.example.rememberme.memory.api.dto.MemoryDto
 import com.example.rememberme.memory.api.dto.UpdateMemoryRequestDto
 import com.example.rememberme.memory.domain.Memory
 import com.example.rememberme.memory.infrastructure.persistence.model.DbMemory
+import com.example.rememberme.memory.infrastructure.persistence.model.DbMemoryUserLink
 import com.example.rememberme.memory.infrastructure.persistence.store.JpaMemoryStore
 import com.example.rememberme.shared.domain.Id
 import com.example.rememberme.user.infrastructure.persistence.model.DbUser
@@ -427,5 +428,65 @@ class MemoryControllerIntegrationTest {
         )
             // Then
             .andExpect(status().isUnauthorized)
+    }
+
+    @Test
+    fun `should return linked memories when getLinkedMemories is called`() {
+        // Given
+        // Create a memory owned by otherUser and link it to the current user with access granted
+        val linkedMemoryId = UUID.randomUUID()
+        val linkedMemory = DbMemory(
+            id = linkedMemoryId,
+            text = "Linked memory text",
+            day = today,
+            userId = otherUserId,
+            userLinks = listOf(
+                DbMemoryUserLink(
+                    userId = userId,
+                    userCanAccess = true
+                )
+            )
+        )
+        jpaMemoryStore.save(linkedMemory)
+
+        // Create another memory owned by otherUser but with access not granted to current user
+        val noAccessMemoryId = UUID.randomUUID()
+        val noAccessMemory = DbMemory(
+            id = noAccessMemoryId,
+            text = "No access memory text",
+            day = today,
+            userId = otherUserId,
+            userLinks = listOf(
+                DbMemoryUserLink(
+                    userId = userId,
+                    userCanAccess = false
+                )
+            )
+        )
+        jpaMemoryStore.save(noAccessMemory)
+
+        // When
+        val result = mockMvc.perform(
+            get("/memories/linked")
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(basicAuth(userId.toString(), "zenika"))
+        )
+            // Then
+            .andExpect(status().isOk)
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andReturn()
+
+        // Parse the response content into a list of MemoryDto objects
+        val memories: List<MemoryDto> = objectMapper.readValue(result.response.contentAsString)
+
+        // Validate the response
+        // Should only contain the memory where the user is linked and has access granted
+        assertThat(memories).hasSize(1)
+        assertThat(memories[0].id.asString()).isEqualTo(linkedMemoryId.toString())
+        assertThat(memories[0].text).isEqualTo("Linked memory text")
+        assertThat(memories[0].day).isEqualTo(today)
+
+        // Verify that the memory where the user is linked but doesn't have access is not included
+        assertThat(memories).noneMatch { it.id.asString() == noAccessMemoryId.toString() }
     }
 }
