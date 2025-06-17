@@ -1,0 +1,6 @@
+Voici l'url de la documentation open api de mon application http://localhost:8080/api/v3/api-docs
+
+Peux tu ajouter des utilisateurs de façon aléatoire jusqu'à en avoir 10 ?
+Chaque utilisateur doit avoir:
+- un email : générés aléatoirement (mais représentant un email syntaxiquement valid)
+- un pseudo : un petit nom court et rigolo
