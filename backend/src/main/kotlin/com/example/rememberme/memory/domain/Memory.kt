@@ -38,7 +38,12 @@ data class MemoryUserLinkConfig(
 
 @JvmInline
 value class MemoryText(val value: String) {
+
+    companion object {
+        const val MAX_VALUE_LENGTH = 1000
+    }
+
     init {
-        require(value.length <= 1000) { "Memory text cannot exceed 1000 characters" }
+        require(value.length <= MAX_VALUE_LENGTH) { "Memory text cannot exceed $MAX_VALUE_LENGTH characters" }
     }
 }
