@@ -118,4 +118,43 @@ class MemoryTest {
         assertThat(memory.hasOwnerId(ownerId)).isTrue()
         assertThat(memory.hasOwnerId(anotherOwnerId)).isFalse()
     }
+
+    @Test
+    fun `should check if memory is accessible by user`() {
+        // Given
+        val ownerId = Id<User>(UUID.randomUUID())
+        val linkedUserWithAccessId = Id<User>(UUID.randomUUID())
+        val linkedUserWithoutAccessId = Id<User>(UUID.randomUUID())
+        val notLinkedUserId = Id<User>(UUID.randomUUID())
+
+        val memory = Memory(
+            id = Id<Memory>(UUID.randomUUID()),
+            text = MemoryText("This is a valid memory text"),
+            day = LocalDate.now(),
+            ownerId = ownerId,
+            userLinks = listOf(
+                MemoryUserLinkConfig(
+                    userId = linkedUserWithAccessId,
+                    userCanAccess = true
+                ),
+                MemoryUserLinkConfig(
+                    userId = linkedUserWithoutAccessId,
+                    userCanAccess = false
+                )
+            )
+        )
+
+        // When/Then
+        // Owner should have access
+        assertThat(memory.isAccessibleByUser(ownerId)).isTrue()
+
+        // Linked user with access should have access
+        assertThat(memory.isAccessibleByUser(linkedUserWithAccessId)).isTrue()
+
+        // Linked user without access should not have access
+        assertThat(memory.isAccessibleByUser(linkedUserWithoutAccessId)).isFalse()
+
+        // Not linked user should not have access
+        assertThat(memory.isAccessibleByUser(notLinkedUserId)).isFalse()
+    }
 }

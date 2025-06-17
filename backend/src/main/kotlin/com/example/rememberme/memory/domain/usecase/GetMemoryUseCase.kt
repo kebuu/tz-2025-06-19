@@ -10,7 +10,7 @@ import com.example.rememberme.user.domain.User
 class GetMemoryUseCase(private val memoryRepository: MemoryRepository) : UseCase<GetMemoryInput, Memory?> {
     override fun execute(input: GetMemoryInput): Memory? {
         return memoryRepository.findById(input.memoryId)
-            ?.takeIf { memory -> memory.hasOwnerId(input.userId)}
+            ?.takeIf { memory -> memory.isAccessibleByUser(input.userId) }
     }
 }
 

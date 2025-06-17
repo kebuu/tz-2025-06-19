@@ -18,6 +18,10 @@ data class Memory(
 
     fun hasOwnerId(ownerId: Id<User>): Boolean = this.ownerId == ownerId
 
+    fun isAccessibleByUser(userId: Id<User>): Boolean {
+        return hasOwnerId(userId) || userLinks.any { link -> link.userId == userId && link.userCanAccess }
+    }
+
     private fun checkOwnerIsNotInUserLinks() {
         check(userLinks.none { it.userId == ownerId }) { "Owner cannot be linked to its memory" }
     }
