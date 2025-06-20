@@ -10,7 +10,6 @@ import com.example.rememberme.memory.infrastructure.persistence.store.JpaMemoryS
 import com.example.rememberme.shared.domain.Id
 import com.example.rememberme.user.domain.User
 import org.springframework.stereotype.Component
-import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 
 @Component
@@ -33,7 +32,6 @@ class JpaMemoryRepository(
         return jpaMemoryStore.existsByDayAndUserId(day, ownerId.value)
     }
 
-    @Transactional
     override fun save(memory: Memory) {
         jpaMemoryStore.save(DbMemory(
             id = memory.id.value,
@@ -48,7 +46,6 @@ class JpaMemoryRepository(
         ))
     }
 
-    @Transactional
     override fun delete(id: Id<Memory>) {
         jpaMemoryStore.deleteById(id.value)
     }

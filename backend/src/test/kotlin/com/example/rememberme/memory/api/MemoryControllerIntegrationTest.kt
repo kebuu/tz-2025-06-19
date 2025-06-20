@@ -163,10 +163,10 @@ class MemoryControllerIntegrationTest {
     @Test
     fun `should create a memory when createMemory is called`() {
         // Given
-        val futureDate = today.plusDays(7) // Use a future date to avoid conflict with existing memories
+        val pastDate = today.minusDays(7) // Use a past date to avoid conflict with existing memories
         val createMemoryRequest = CreateMemoryRequestDto(
             text = "New memory text",
-            day = futureDate
+            day = pastDate
         )
 
         // When
@@ -185,7 +185,7 @@ class MemoryControllerIntegrationTest {
 
         // Verify the memory was saved to the database
         val memories = jpaMemoryStore.findAll()
-        assertThat(memories.any { it.text == "New memory text" && it.day == futureDate && it.userId == userId }).isTrue()
+        assertThat(memories.any { it.text == "New memory text" && it.day == pastDate && it.userId == userId }).isTrue()
 
         // Verify that the URI in the location header can be used to retrieve the newly created memory
         val getMemoryResult = mockMvc.perform(
@@ -205,7 +205,7 @@ class MemoryControllerIntegrationTest {
         assertThat(memory).isEqualTo(MemoryDto(
             id = memory.id,
             text = "New memory text",
-            day = futureDate
+            day = pastDate
         ))
     }
 
@@ -488,6 +488,31 @@ class MemoryControllerIntegrationTest {
 
         // Verify that the memory where the user is linked but doesn't have access is not included
         assertThat(memories).noneMatch { it.id.asString() == noAccessMemoryId.toString() }
+    }
+
+    @Test
+    fun `should return 400 when trying to create a memory with a future date`() {
+        // Given
+        val futureDate = today.plusDays(1) // Date in the future
+        val createMemoryRequest = CreateMemoryRequestDto(
+            text = "Future memory text",
+            day = futureDate
+        )
+
+        // When
+        mockMvc.perform(
+            post("/memories")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createMemoryRequest))
+                .with(basicAuth(userId.toString(), "zenika"))
+        )
+            // Then
+            .andExpect(status().isBadRequest)
+            .andReturn()
+
+        // Verify no new memory was created
+        val memories = jpaMemoryStore.findAll()
+        assertThat(memories.none { it.text == "Future memory text" }).isTrue()
     }
 
     @Test

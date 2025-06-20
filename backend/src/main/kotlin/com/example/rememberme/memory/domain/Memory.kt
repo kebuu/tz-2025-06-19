@@ -14,6 +14,11 @@ data class Memory(
     init {
         checkOwnerIsNotInUserLinks()
         checkNoUserLinkedMoreThanOnce()
+        checkDayIsNotInFuture()
+    }
+
+    private fun checkDayIsNotInFuture() {
+        check(day <= LocalDate.now()) { "Memory date cannot be in the future" }
     }
 
     fun hasOwnerId(ownerId: Id<User>): Boolean = this.ownerId == ownerId

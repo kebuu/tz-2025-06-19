@@ -120,6 +120,28 @@ class MemoryTest {
     }
 
     @Test
+    fun `should throw exception when memory date is in the future`() {
+        // Given
+        val ownerId = Id<User>(UUID.randomUUID())
+        val text = MemoryText("This is a valid memory text")
+        val futureDay = LocalDate.now().plusDays(1) // Date in the future
+        val userLinks = emptyList<MemoryUserLinkConfig>()
+
+        // When/Then
+        assertThatThrownBy {
+            Memory(
+                id = Id<Memory>(UUID.randomUUID()),
+                text = text,
+                day = futureDay,
+                ownerId = ownerId,
+                userLinks = userLinks
+            )
+        }
+            .isInstanceOf(IllegalStateException::class.java)
+            .hasMessageContaining("Memory date cannot be in the future")
+    }
+
+    @Test
     fun `should check if memory is accessible by user`() {
         // Given
         val ownerId = Id<User>(UUID.randomUUID())

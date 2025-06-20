@@ -6,7 +6,6 @@ import com.example.rememberme.memory.domain.MemoryText
 import com.example.rememberme.memory.domain.MemoryUserLinkConfig
 import com.example.rememberme.memory.domain.spi.MemoryRepository
 import com.example.rememberme.shared.domain.Id
-import com.example.rememberme.memory.domain.MemoryAlreadyExists
 import com.example.rememberme.user.domain.User
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -54,6 +53,20 @@ class CreateMemoryUseCaseTest {
         // Then
         assertThat(result).isEqualTo(Either.Left(MemoryAlreadyExists))
         verify(memoryRepository).existsByDayAndOwnerId(day, ownerId)
+    }
+
+    @Test
+    fun `should return MemoryInTheFuture when memory date is in the future`() {
+        // Given
+        val ownerId = Id<User>(UUID.randomUUID())
+        val futureDay = LocalDate.now().plusDays(1) // Date in the future
+        val memory = createValidMemory(ownerId, futureDay)
+
+        // When
+        val result = createMemoryUseCase.execute(memory)
+
+        // Then
+        assertThat(result).isEqualTo(Either.Left(MemoryInTheFuture))
     }
 
     private fun createValidMemory(ownerId: Id<User>, day: LocalDate): Memory {

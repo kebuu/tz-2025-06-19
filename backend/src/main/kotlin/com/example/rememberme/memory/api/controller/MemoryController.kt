@@ -12,6 +12,8 @@ import com.example.rememberme.memory.domain.usecase.GetLinkedMemoriesUseCase
 import com.example.rememberme.memory.domain.usecase.GetMemoriesUseCase
 import com.example.rememberme.memory.domain.usecase.GetMemoryInput
 import com.example.rememberme.memory.domain.usecase.GetMemoryUseCase
+import com.example.rememberme.memory.domain.usecase.MemoryAlreadyExists
+import com.example.rememberme.memory.domain.usecase.MemoryInTheFuture
 import com.example.rememberme.memory.domain.usecase.UpdateMemoryUseCase
 import com.example.rememberme.shared.domain.Id
 import com.example.rememberme.user.domain.User
@@ -120,8 +122,11 @@ class MemoryController(
         )
 
         return createMemoryUseCase.execute(newMemory).fold(
-            ifLeft = { 
-                ResponseEntity.status(HttpStatus.CONFLICT).build()
+            ifLeft = { error -> 
+                when (error) {
+                    is MemoryInTheFuture -> ResponseEntity.status(HttpStatus.BAD_REQUEST).build()
+                    is MemoryAlreadyExists -> ResponseEntity.status(HttpStatus.CONFLICT).build()
+                }
             },
             ifRight = {
                 // Create a URI for the new memory
