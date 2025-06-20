@@ -11,6 +11,7 @@ import com.example.rememberme.shared.domain.Id
 import com.example.rememberme.user.domain.User
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
 
 @Component
 class JpaMemoryRepository(
@@ -26,6 +27,10 @@ class JpaMemoryRepository(
         return jpaMemoryStore.findMemoryById(id.value)?.let { dbMemory ->
             toDomain(dbMemory)
         }
+    }
+
+    override fun existsByDayAndOwnerId(day: LocalDate, ownerId: Id<User>): Boolean {
+        return jpaMemoryStore.existsByDayAndUserId(day, ownerId.value)
     }
 
     @Transactional

@@ -163,9 +163,10 @@ class MemoryControllerIntegrationTest {
     @Test
     fun `should create a memory when createMemory is called`() {
         // Given
+        val futureDate = today.plusDays(7) // Use a future date to avoid conflict with existing memories
         val createMemoryRequest = CreateMemoryRequestDto(
             text = "New memory text",
-            day = today
+            day = futureDate
         )
 
         // When
@@ -184,8 +185,7 @@ class MemoryControllerIntegrationTest {
 
         // Verify the memory was saved to the database
         val memories = jpaMemoryStore.findAll()
-        assertThat(memories).hasSize(4) // 3 existing memories + 1 new memory
-        assertThat(memories.any { it.text == "New memory text" && it.day == today && it.userId == userId }).isTrue()
+        assertThat(memories.any { it.text == "New memory text" && it.day == futureDate && it.userId == userId }).isTrue()
 
         // Verify that the URI in the location header can be used to retrieve the newly created memory
         val getMemoryResult = mockMvc.perform(
@@ -205,7 +205,7 @@ class MemoryControllerIntegrationTest {
         assertThat(memory).isEqualTo(MemoryDto(
             id = memory.id,
             text = "New memory text",
-            day = today
+            day = futureDate
         ))
     }
 
@@ -488,5 +488,31 @@ class MemoryControllerIntegrationTest {
 
         // Verify that the memory where the user is linked but doesn't have access is not included
         assertThat(memories).noneMatch { it.id.asString() == noAccessMemoryId.toString() }
+    }
+
+    @Test
+    fun `should return 409 when trying to create a memory with same date and owner as existing memory`() {
+        // Given
+        val createMemoryRequest = CreateMemoryRequestDto(
+            text = "Duplicate memory text",
+            day = today // Same day as memoryId1
+        )
+
+        // When
+        mockMvc.perform(
+            post("/memories")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createMemoryRequest))
+                .with(basicAuth(userId.toString(), "zenika"))
+        )
+            // Then
+            .andExpect(status().isConflict)
+            .andReturn()
+
+        // No need to verify the response content as it's empty
+
+        // Verify no new memory was created
+        val memories = jpaMemoryStore.findAll()
+        assertThat(memories.none { it.text == "Duplicate memory text" }).isTrue()
     }
 }

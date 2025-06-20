@@ -118,20 +118,26 @@ class MemoryController(
             ownerId = Id.of<User>(userId),
             userLinks = emptyList()
         )
-        createMemoryUseCase.execute(newMemory)
 
-        // Create a URI for the new memory
-        val uri = MvcUriComponentsBuilder
-            .fromMethod(
-                MemoryController::class.java,
-                MemoryController::getMemory.javaMethod!!,
-                newMemory.id.asString(),
-                userDetails
-            )
-            .build()
-            .toUri()
+        return createMemoryUseCase.execute(newMemory).fold(
+            ifLeft = { 
+                ResponseEntity.status(HttpStatus.CONFLICT).build()
+            },
+            ifRight = {
+                // Create a URI for the new memory
+                val uri = MvcUriComponentsBuilder
+                    .fromMethod(
+                        MemoryController::class.java,
+                        MemoryController::getMemory.javaMethod!!,
+                        newMemory.id.asString(),
+                        userDetails
+                    )
+                    .build()
+                    .toUri()
 
-        return ResponseEntity.created(uri).build()
+                ResponseEntity.created(uri).build()
+            }
+        )
     }
 
     @PutMapping("/{id}")

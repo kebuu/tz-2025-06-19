@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
+import java.time.LocalDate
 import java.util.UUID
 
 @Repository
@@ -12,6 +13,8 @@ interface JpaMemoryStore : JpaRepository<DbMemory, UUID>, JpaSpecificationExecut
     fun findMemoryById(id: UUID): DbMemory?
 
     fun findAllByUserId(userId: UUID): List<DbMemory>
+
+    fun existsByDayAndUserId(day: LocalDate, userId: UUID): Boolean
 
     @Query("""select memory 
         from DbMemory memory 

@@ -24,3 +24,6 @@ always try to store version numbers as properties
 
 ## Testing
 * Use AssertJ for assertions
+
+## Git
+* Always add the file you create to git staging
