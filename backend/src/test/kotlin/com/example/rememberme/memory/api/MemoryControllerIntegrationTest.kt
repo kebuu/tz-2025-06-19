@@ -8,6 +8,7 @@ import com.example.rememberme.memory.infrastructure.persistence.model.DbMemory
 import com.example.rememberme.memory.infrastructure.persistence.model.DbMemoryUserLink
 import com.example.rememberme.memory.infrastructure.persistence.store.JpaMemoryStore
 import com.example.rememberme.shared.domain.Id
+import com.example.rememberme.shared.test.IntegrationTest
 import com.example.rememberme.user.infrastructure.persistence.model.DbUser
 import com.example.rememberme.user.infrastructure.persistence.repository.JpaUserStore
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -16,10 +17,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
-import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
@@ -32,10 +30,7 @@ import java.time.LocalDate
 import java.util.Base64
 import java.util.UUID
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@ActiveProfiles("test")
-class MemoryControllerIntegrationTest {
+class MemoryControllerIntegrationTest : IntegrationTest() {
 
     @Autowired
     private lateinit var mockMvc: MockMvc

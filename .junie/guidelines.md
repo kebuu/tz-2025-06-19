@@ -52,4 +52,4 @@ function for the endpoint in which it is used and verify that all validations ar
 single test function)
 
 ## Git
-* Always add the file you create to git staging
+* Always stage the files you create to git
