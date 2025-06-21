@@ -49,6 +49,7 @@ value class MemoryText(val value: String) {
 
     init {
         require(value.length <= MAX_VALUE_LENGTH) { "Memory text cannot exceed $MAX_VALUE_LENGTH characters" }
+        require(value.isNotBlank()) { "Memory text cannot be blank" }
     }
 }
 

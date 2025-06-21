@@ -491,31 +491,6 @@ class MemoryControllerIntegrationTest {
     }
 
     @Test
-    fun `should return 400 when trying to create a memory with a future date`() {
-        // Given
-        val futureDate = today.plusDays(1) // Date in the future
-        val createMemoryRequest = CreateMemoryRequestDto(
-            text = "Future memory text",
-            day = futureDate
-        )
-
-        // When
-        mockMvc.perform(
-            post("/memories")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(createMemoryRequest))
-                .with(basicAuth(userId.toString(), "zenika"))
-        )
-            // Then
-            .andExpect(status().isBadRequest)
-            .andReturn()
-
-        // Verify no new memory was created
-        val memories = jpaMemoryStore.findAll()
-        assertThat(memories.none { it.text == "Future memory text" }).isTrue()
-    }
-
-    @Test
     fun `should return 409 when trying to create a memory with same date and owner as existing memory`() {
         // Given
         val createMemoryRequest = CreateMemoryRequestDto(

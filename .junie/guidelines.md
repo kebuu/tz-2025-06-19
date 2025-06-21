@@ -47,6 +47,9 @@ always try to store version numbers as properties
  ```
 * When you need to validate a list of elements, you can also use alternative like: containsExactlyInAnyOrder,
   containsAnyElementsOf,extracting, flatExtracting...
+* When a DTO contains validation annotations, don't create a test class directly for that DTO but add a test 
+function for the endpoint in which it is used and verify that all validations are handled properly (is possible in a
+single test function)
 
 ## Git
 * Always add the file you create to git staging

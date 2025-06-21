@@ -11,6 +11,19 @@ import java.util.UUID
 class MemoryTest {
 
     @Test
+    fun `should throw exception when memory text is blank`() {
+        // Given
+        val blankText = "   "
+
+        // When/Then
+        assertThatThrownBy {
+            MemoryText(blankText)
+        }
+            .isInstanceOf(IllegalArgumentException::class.java)
+            .hasMessageContaining("Memory text cannot be blank")
+    }
+
+    @Test
     fun `should throw exception when owner is linked to its memory`() {
         // Given
         val ownerId = Id<User>(UUID.randomUUID())
