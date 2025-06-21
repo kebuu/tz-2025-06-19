@@ -8,8 +8,8 @@ import jakarta.validation.constraints.Size
 import java.time.LocalDate
 
 data class CreateMemoryRequestDto(
-    @Size(max = MemoryText.MAX_VALUE_LENGTH)
-    @NotBlank
+    @field:Size(max = MemoryText.MAX_VALUE_LENGTH)
+    @field:NotBlank
     val text: String,
 
     @field:PastOrPresent

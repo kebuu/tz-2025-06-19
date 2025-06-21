@@ -24,10 +24,12 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
+import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.core.userdetails.UserDetails
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -45,6 +47,7 @@ import kotlin.reflect.jvm.javaMethod
 @RequestMapping("/memories")
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
 @Tag(name = "Memory", description = "Memory management API")
+@Validated
 class MemoryController(
     val memoriesUseCase: GetMemoriesUseCase,
     val getMemoryUseCase: GetMemoryUseCase,
@@ -109,7 +112,7 @@ class MemoryController(
     ])
     fun createMemory(
         @Parameter(description = "Memory to create", required = true) 
-        @RequestBody request: CreateMemoryRequestDto,
+        @RequestBody @Valid request: CreateMemoryRequestDto,
         @AuthenticationPrincipal userDetails: UserDetails
     ): ResponseEntity<Void> {
         val userId = UUID.fromString(userDetails.username)
@@ -153,7 +156,7 @@ class MemoryController(
     ])
     fun updateMemory(
         @Parameter(description = "ID of the memory to update") @PathVariable id: UUID,
-        @Parameter(description = "Updated memory data", required = true) @RequestBody request: UpdateMemoryRequestDto,
+        @Parameter(description = "Updated memory data", required = true) @RequestBody @Valid request: UpdateMemoryRequestDto,
         @AuthenticationPrincipal userDetails: UserDetails
     ): ResponseEntity<Void> {
         val userId = Id.of<User>(UUID.fromString(userDetails.username))

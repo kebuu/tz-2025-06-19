@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.MvcResult
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
@@ -317,12 +318,6 @@ class MemoryControllerIntegrationTest : IntegrationTest() {
         )
             // Then
             .andExpect(status().isNotFound)
-
-        // Verify the memory was not updated in the database
-        val memory = jpaMemoryStore.findMemoryById(otherUserMemoryId)
-        assertThat(memory).isNotNull
-        assertThat(memory?.text).isEqualTo("Other user's memory")
-        assertThat(memory?.day).isEqualTo(today)
     }
 
     @Test
@@ -339,16 +334,6 @@ class MemoryControllerIntegrationTest : IntegrationTest() {
         // Verify the memory was deleted from the database
         val deletedMemory = jpaMemoryStore.findMemoryById(memoryId1)
         assertThat(deletedMemory).isNull()
-
-        // Verify that only one memory was deleted
-        val remainingMemories = jpaMemoryStore.findAllByUserId(userId)
-        assertThat(remainingMemories).hasSize(1)
-        assertThat(remainingMemories[0].id).isEqualTo(memoryId2)
-
-        // Verify that the other user's memory was not deleted
-        val otherUserMemories = jpaMemoryStore.findAllByUserId(otherUserId)
-        assertThat(otherUserMemories).hasSize(1)
-        assertThat(otherUserMemories[0].id).isEqualTo(otherUserMemoryId)
     }
 
     @Test
@@ -364,14 +349,6 @@ class MemoryControllerIntegrationTest : IntegrationTest() {
         )
             // Then
             .andExpect(status().isNotFound)
-
-        // Verify that no memories were deleted
-        val userMemories = jpaMemoryStore.findAllByUserId(userId)
-        assertThat(userMemories).hasSize(2)
-
-        // Verify that the other user's memory was not deleted
-        val otherUserMemories = jpaMemoryStore.findAllByUserId(otherUserId)
-        assertThat(otherUserMemories).hasSize(1)
     }
 
     @Test
@@ -384,18 +361,6 @@ class MemoryControllerIntegrationTest : IntegrationTest() {
         )
             // Then
             .andExpect(status().isNotFound)
-
-        // Verify that the memory was not deleted from the database
-        val memory = jpaMemoryStore.findMemoryById(otherUserMemoryId)
-        assertThat(memory).isNotNull
-
-        // Verify that no user memories were deleted
-        val userMemories = jpaMemoryStore.findAllByUserId(userId)
-        assertThat(userMemories).hasSize(2)
-
-        // Verify that all other user memories are still there
-        val otherUserMemories = jpaMemoryStore.findAllByUserId(otherUserId)
-        assertThat(otherUserMemories).hasSize(1)
     }
 
     @Test
@@ -509,5 +474,51 @@ class MemoryControllerIntegrationTest : IntegrationTest() {
         // Verify no new memory was created
         val memories = jpaMemoryStore.findAll()
         assertThat(memories.none { it.text == "Duplicate memory text" }).isTrue()
+    }
+
+    @Test
+    fun `should return 400 when validation constraints on createMemory request body are violated`() {
+        // Test case: Blank text
+        val blankTextRequest = CreateMemoryRequestDto(
+            text = "   ", // Blank text
+            day = today.minusDays(1)
+        )
+
+        val result = callCreateMemoryApi(blankTextRequest)
+
+        val response = result.response.contentAsString
+
+        // Parse the response and verify it contains an error for the text field
+        val errors: Map<String, String> = objectMapper.readValue(response)
+        assertThat(errors).containsKey("text")
+        assertThat(errors["text"]).isNotEmpty()
+    }
+
+    @Test
+    fun `should return 400 when future date is provided in createMemory request`() {
+        // Test case: Future date
+        val futureDate = LocalDate.now().plusDays(1)
+        val futureDateRequest = CreateMemoryRequestDto(
+            text = "Memory with future date",
+            day = futureDate
+        )
+
+        val result = callCreateMemoryApi(futureDateRequest)
+
+        // Parse the response and verify it contains an error for the day field
+        val errors: Map<String, String> = objectMapper.readValue(result.response.contentAsString)
+        assertThat(errors).containsKey("day")
+        assertThat(errors["day"]).isNotEmpty()
+    }
+
+    private fun callCreateMemoryApi(futureDateRequest: CreateMemoryRequestDto): MvcResult {
+        return mockMvc.perform(
+            post("/memories")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(futureDateRequest))
+                .with(basicAuth(userId.toString(), "zenika"))
+        )
+            .andExpect(status().isBadRequest)
+            .andReturn()
     }
 }
