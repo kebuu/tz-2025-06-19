@@ -11,30 +11,23 @@ import com.example.rememberme.shared.domain.Id
 import com.example.rememberme.shared.test.IntegrationTest
 import com.example.rememberme.user.infrastructure.persistence.model.DbUser
 import com.example.rememberme.user.infrastructure.persistence.repository.JpaUserStore
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
-import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.MvcResult
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
-import org.springframework.test.web.servlet.request.RequestPostProcessor
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.time.LocalDate
-import java.util.Base64
 import java.util.UUID
 
 class MemoryControllerIntegrationTest : IntegrationTest() {
-
-    @Autowired
-    private lateinit var mockMvc: MockMvc
 
     @Autowired
     private lateinit var jpaMemoryStore: JpaMemoryStore
@@ -42,23 +35,11 @@ class MemoryControllerIntegrationTest : IntegrationTest() {
     @Autowired
     private lateinit var jpaUserStore: JpaUserStore
 
-    @Autowired
-    private lateinit var objectMapper: ObjectMapper
-
     private lateinit var memoryId1: UUID
     private lateinit var memoryId2: UUID
     private lateinit var userId: UUID
     private val today = LocalDate.now()
     private val yesterday = today.minusDays(1)
-
-    // Helper method for Basic authentication
-    private fun basicAuth(username: String, password: String): RequestPostProcessor {
-        return RequestPostProcessor { request ->
-            val base64Credentials = Base64.getEncoder().encodeToString("$username:$password".toByteArray())
-            request.addHeader("Authorization", "Basic $base64Credentials")
-            request
-        }
-    }
 
     private lateinit var otherUserId: UUID
     private lateinit var otherUserMemoryId: UUID
@@ -486,12 +467,7 @@ class MemoryControllerIntegrationTest : IntegrationTest() {
 
         val result = callCreateMemoryApi(blankTextRequest)
 
-        val response = result.response.contentAsString
-
-        // Parse the response and verify it contains an error for the text field
-        val errors: Map<String, String> = objectMapper.readValue(response)
-        assertThat(errors).containsKey("text")
-        assertThat(errors["text"]).isNotEmpty()
+        assertFieldHasError(result, "text")
     }
 
     @Test
@@ -505,13 +481,10 @@ class MemoryControllerIntegrationTest : IntegrationTest() {
 
         val result = callCreateMemoryApi(futureDateRequest)
 
-        // Parse the response and verify it contains an error for the day field
-        val errors: Map<String, String> = objectMapper.readValue(result.response.contentAsString)
-        assertThat(errors).containsKey("day")
-        assertThat(errors["day"]).isNotEmpty()
+        assertFieldHasError(result, "day")
     }
 
-    private fun callCreateMemoryApi(futureDateRequest: CreateMemoryRequestDto): MvcResult {
+    fun callCreateMemoryApi(futureDateRequest: CreateMemoryRequestDto): MvcResult {
         return mockMvc.perform(
             post("/memories")
                 .contentType(MediaType.APPLICATION_JSON)

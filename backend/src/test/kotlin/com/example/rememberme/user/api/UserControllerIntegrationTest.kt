@@ -9,14 +9,12 @@ import com.example.rememberme.user.domain.Pseudo
 import com.example.rememberme.user.domain.User
 import com.example.rememberme.user.infrastructure.persistence.model.DbUser
 import com.example.rememberme.user.infrastructure.persistence.repository.JpaUserStore
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
-import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
@@ -26,13 +24,7 @@ import java.util.UUID
 class UserControllerIntegrationTest : IntegrationTest() {
 
     @Autowired
-    private lateinit var mockMvc: MockMvc
-
-    @Autowired
     private lateinit var jpaUserStore: JpaUserStore
-
-    @Autowired
-    private lateinit var objectMapper: ObjectMapper
 
     private lateinit var userId1: UUID
     private lateinit var userId2: UUID
