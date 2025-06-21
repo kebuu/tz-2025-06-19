@@ -2,6 +2,7 @@ package com.example.rememberme.memory.domain.usecase
 
 import arrow.core.Either
 import com.example.rememberme.memory.domain.Memory
+import com.example.rememberme.memory.domain.MemoryDay
 import com.example.rememberme.memory.domain.MemoryText
 import com.example.rememberme.memory.domain.MemoryUserLinkConfig
 import com.example.rememberme.memory.domain.spi.MemoryRepository
@@ -55,25 +56,11 @@ class CreateMemoryUseCaseTest {
         verify(memoryRepository).existsByDayAndOwnerId(day, ownerId)
     }
 
-    @Test
-    fun `should return MemoryInTheFuture when memory date is in the future`() {
-        // Given
-        val ownerId = Id<User>(UUID.randomUUID())
-        val futureDay = LocalDate.now().plusDays(1) // Date in the future
-        val memory = createValidMemory(ownerId, futureDay)
-
-        // When
-        val result = createMemoryUseCase.execute(memory)
-
-        // Then
-        assertThat(result).isEqualTo(Either.Left(MemoryInTheFuture))
-    }
-
     private fun createValidMemory(ownerId: Id<User>, day: LocalDate): Memory {
         return Memory(
             id = Id<Memory>(UUID.randomUUID()),
             text = MemoryText("This is a valid memory text"),
-            day = day,
+            day = MemoryDay(day),
             ownerId = ownerId,
             userLinks = listOf(
                 MemoryUserLinkConfig(

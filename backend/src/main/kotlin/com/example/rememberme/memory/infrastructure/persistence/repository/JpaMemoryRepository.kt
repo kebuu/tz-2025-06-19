@@ -1,6 +1,7 @@
 package com.example.rememberme.memory.infrastructure.persistence.repository
 
 import com.example.rememberme.memory.domain.Memory
+import com.example.rememberme.memory.domain.MemoryDay
 import com.example.rememberme.memory.domain.MemoryText
 import com.example.rememberme.memory.domain.MemoryUserLinkConfig
 import com.example.rememberme.memory.domain.spi.MemoryRepository
@@ -36,12 +37,13 @@ class JpaMemoryRepository(
         jpaMemoryStore.save(DbMemory(
             id = memory.id.value,
             text = memory.text.value,
-            day = memory.day,
+            day = memory.day.value,
             userId = memory.ownerId.value,
-            userLinks = memory.userLinks.map { DbMemoryUserLink(
-                userId = it.userId.value,
-                userCanAccess = it.userCanAccess
-            )
+            userLinks = memory.userLinks.map {
+                DbMemoryUserLink(
+                    userId = it.userId.value,
+                    userCanAccess = it.userCanAccess
+                )
             },
         ))
     }
@@ -62,7 +64,7 @@ class JpaMemoryRepository(
     private fun toDomain(memory: DbMemory): Memory = Memory(
         id = Id(memory.id),
         text = MemoryText(memory.text),
-        day = memory.day,
+        day = MemoryDay(memory.day),
         ownerId = Id(memory.userId),
         userLinks = memory.userLinks.map {
             MemoryUserLinkConfig(

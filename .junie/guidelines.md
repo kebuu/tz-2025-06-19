@@ -14,9 +14,14 @@
 
 * Do not create documentation for classes nor functions expect if asked
 * When working on a specific task, do not refactor code not related to the task
+* In domain package avoid using primitive types when a value class is available
+
+### Value classes
+* When `value class` has specific constraints or methods, create a specific test class for them to validate these
+
 
 ## Maven
-* When adding or updating version of dependencies or plugins in pom.xml, 
+* When adding or updating a version of dependencies or plugins in pom.xml, 
 always try to store version numbers as properties
 
 ## Refactoring
@@ -24,6 +29,24 @@ always try to store version numbers as properties
 
 ## Testing
 * Use AssertJ for assertions
+* When you need to validate all properties of an object, use a single statement like 
+ `Assertions.assertThat(actualObject).isEqualTo(expectedObject)` instead of many statements like
+ ``` 
+ assertThat(actualObject.propery1).isEqualTo(expectedValue1)
+ assertThat(actualObject.propery2).isEqualTo(expectedValue2)
+ assertThat(actualObject.propery3).isEqualTo(expectedValue3)
+ ```
+* When you need to validate a list of elements, use a single statement like
+ `Assertions.assertThat(actualList).isEqualTo(expectedObject)` instead of many statements like
+ ``` 
+ assertThat(actualList).hasSize(n)
+ assertThat(actualList[0]).isEqualTo(expectedObject0)
+ assertThat(actualList[1]).isEqualTo(expectedObject1)
+ ...
+ assertThat(actualList[n]).isEqualTo(expectedObjectn)
+ ```
+* When you need to validate a list of elements, you can also use alternative like: containsExactlyInAnyOrder,
+  containsAnyElementsOf,extracting, flatExtracting...
 
 ## Git
 * Always add the file you create to git staging

@@ -6,21 +6,16 @@ import arrow.core.raise.ensure
 import com.example.rememberme.memory.domain.Memory
 import com.example.rememberme.memory.domain.spi.MemoryRepository
 import com.example.rememberme.shared.domain.usecase.UseCase
-import java.time.LocalDate
 
 sealed class CreateMemoryError
 object MemoryAlreadyExists : CreateMemoryError()
-object MemoryInTheFuture : CreateMemoryError()
 
 class CreateMemoryUseCase(
     private val memoryRepository: MemoryRepository
 ) : UseCase<Memory, Either<CreateMemoryError, Unit>> {
     override fun execute(input: Memory): Either<CreateMemoryError, Unit> {
         return either {
-            ensure(input.day <= LocalDate.now()) { 
-                MemoryInTheFuture
-            }
-            ensure(!memoryRepository.existsByDayAndOwnerId(input.day, input.ownerId)) { 
+            ensure(!memoryRepository.existsByDayAndOwnerId(input.day.value, input.ownerId)) { 
                 MemoryAlreadyExists 
             }
             memoryRepository.save(input)

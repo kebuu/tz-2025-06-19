@@ -7,18 +7,13 @@ import java.time.LocalDate
 data class Memory(
     val id: Id<Memory>,
     val text: MemoryText,
-    val day: LocalDate,
+    val day: MemoryDay,
     val ownerId: Id<User>,
     val userLinks: List<MemoryUserLinkConfig>
 ) {
     init {
         checkOwnerIsNotInUserLinks()
         checkNoUserLinkedMoreThanOnce()
-        checkDayIsNotInFuture()
-    }
-
-    private fun checkDayIsNotInFuture() {
-        check(day <= LocalDate.now()) { "Memory date cannot be in the future" }
     }
 
     fun hasOwnerId(ownerId: Id<User>): Boolean = this.ownerId == ownerId
@@ -54,5 +49,13 @@ value class MemoryText(val value: String) {
 
     init {
         require(value.length <= MAX_VALUE_LENGTH) { "Memory text cannot exceed $MAX_VALUE_LENGTH characters" }
+    }
+}
+
+@JvmInline
+value class MemoryDay(val value: LocalDate) {
+
+    init {
+        require(value <= LocalDate.now()) { "Memory day cannot be in the future" }
     }
 }

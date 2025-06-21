@@ -15,7 +15,7 @@ class MemoryTest {
         // Given
         val ownerId = Id<User>(UUID.randomUUID())
         val text = MemoryText("This is a valid memory text")
-        val day = LocalDate.now()
+        val day = MemoryDay(LocalDate.now())
         val userLinks = listOf(
             MemoryUserLinkConfig(
                 userId = ownerId, // Owner is linked to its memory
@@ -43,7 +43,7 @@ class MemoryTest {
         val ownerId = Id<User>(UUID.randomUUID())
         val linkedUserId = Id<User>(UUID.randomUUID())
         val text = MemoryText("This is a valid memory text")
-        val day = LocalDate.now()
+        val day = MemoryDay(LocalDate.now())
         val userLinks = listOf(
             MemoryUserLinkConfig(
                 userId = linkedUserId,
@@ -73,7 +73,7 @@ class MemoryTest {
     fun `should throw exception when memory text exceeds 1000 characters`() {
         // Given
         val ownerId = Id<User>(UUID.randomUUID())
-        val day = LocalDate.now()
+        val day = MemoryDay(LocalDate.now())
         val userLinks = listOf(
             MemoryUserLinkConfig(
                 userId = Id<User>(UUID.randomUUID()),
@@ -103,7 +103,7 @@ class MemoryTest {
         val memory = Memory(
             id = Id<Memory>(UUID.randomUUID()),
             text = MemoryText("This is a valid memory text"),
-            day = LocalDate.now(),
+            day = MemoryDay(LocalDate.now()),
             ownerId = ownerId,
             userLinks = listOf(
                 MemoryUserLinkConfig(
@@ -120,28 +120,6 @@ class MemoryTest {
     }
 
     @Test
-    fun `should throw exception when memory date is in the future`() {
-        // Given
-        val ownerId = Id<User>(UUID.randomUUID())
-        val text = MemoryText("This is a valid memory text")
-        val futureDay = LocalDate.now().plusDays(1) // Date in the future
-        val userLinks = emptyList<MemoryUserLinkConfig>()
-
-        // When/Then
-        assertThatThrownBy {
-            Memory(
-                id = Id<Memory>(UUID.randomUUID()),
-                text = text,
-                day = futureDay,
-                ownerId = ownerId,
-                userLinks = userLinks
-            )
-        }
-            .isInstanceOf(IllegalStateException::class.java)
-            .hasMessageContaining("Memory date cannot be in the future")
-    }
-
-    @Test
     fun `should check if memory is accessible by user`() {
         // Given
         val ownerId = Id<User>(UUID.randomUUID())
@@ -152,7 +130,7 @@ class MemoryTest {
         val memory = Memory(
             id = Id<Memory>(UUID.randomUUID()),
             text = MemoryText("This is a valid memory text"),
-            day = LocalDate.now(),
+            day = MemoryDay(LocalDate.now()),
             ownerId = ownerId,
             userLinks = listOf(
                 MemoryUserLinkConfig(

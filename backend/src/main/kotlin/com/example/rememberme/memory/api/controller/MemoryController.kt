@@ -4,6 +4,7 @@ import com.example.rememberme.memory.api.dto.CreateMemoryRequestDto
 import com.example.rememberme.memory.api.dto.MemoryDto
 import com.example.rememberme.memory.api.dto.UpdateMemoryRequestDto
 import com.example.rememberme.memory.domain.Memory
+import com.example.rememberme.memory.domain.MemoryDay
 import com.example.rememberme.memory.domain.MemoryText
 import com.example.rememberme.memory.domain.usecase.CreateMemoryUseCase
 import com.example.rememberme.memory.domain.usecase.DeleteMemoryInput
@@ -13,7 +14,6 @@ import com.example.rememberme.memory.domain.usecase.GetMemoriesUseCase
 import com.example.rememberme.memory.domain.usecase.GetMemoryInput
 import com.example.rememberme.memory.domain.usecase.GetMemoryUseCase
 import com.example.rememberme.memory.domain.usecase.MemoryAlreadyExists
-import com.example.rememberme.memory.domain.usecase.MemoryInTheFuture
 import com.example.rememberme.memory.domain.usecase.UpdateMemoryUseCase
 import com.example.rememberme.shared.domain.Id
 import com.example.rememberme.user.domain.User
@@ -66,7 +66,7 @@ class MemoryController(
             MemoryDto(
                 id = memory.id,
                 text = memory.text.value,
-                day = memory.day
+                day = memory.day.value
             )
         }
     }
@@ -93,7 +93,7 @@ class MemoryController(
                     MemoryDto(
                         id = memory.id,
                         text = memory.text.value,
-                        day = memory.day
+                        day = memory.day.value
                     )
                 )
             }
@@ -116,7 +116,7 @@ class MemoryController(
         val newMemory = Memory(
             id = Id.random(),
             text = MemoryText(request.text),
-            day = request.day,
+            day = MemoryDay(request.day),
             ownerId = Id.of<User>(userId),
             userLinks = emptyList()
         )
@@ -124,7 +124,6 @@ class MemoryController(
         return createMemoryUseCase.execute(newMemory).fold(
             ifLeft = { error -> 
                 when (error) {
-                    is MemoryInTheFuture -> ResponseEntity.status(HttpStatus.BAD_REQUEST).build()
                     is MemoryAlreadyExists -> ResponseEntity.status(HttpStatus.CONFLICT).build()
                 }
             },
@@ -166,7 +165,7 @@ class MemoryController(
             val updatedMemory = Memory(
                 id = existingMemory.id,
                 text = MemoryText(request.text),
-                day = request.day,
+                day = MemoryDay(request.day),
                 ownerId = userId,
                 userLinks = existingMemory.userLinks
             )
@@ -188,7 +187,7 @@ class MemoryController(
             MemoryDto(
                 id = memory.id,
                 text = memory.text.value,
-                day = memory.day
+                day = memory.day.value
             )
         }
     }
