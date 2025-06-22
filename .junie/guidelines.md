@@ -52,4 +52,8 @@ function for the endpoint in which it is used and verify that all validations ar
 single test function)
 
 ## Git
+## Git
 * Always stage the files you create to git
+* Before submitting a solution, run `git status` to check for untracked files and stage them with `git add <file_path>`
+* Include all newly created files in your commits, even test files and supporting classes
+* When implementing a feature that requires multiple files, stage each new file immediately after creation
