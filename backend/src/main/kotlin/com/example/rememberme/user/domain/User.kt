@@ -6,6 +6,7 @@ data class User(
     val id: Id<User>,
     val email: Email,
     val pseudo: Pseudo,
+    val preferences: UserPreferences = UserPreferences()
 )
 
 @JvmInline
