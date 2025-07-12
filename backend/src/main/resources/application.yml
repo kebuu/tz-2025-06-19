@@ -8,6 +8,18 @@ server:
 spring:
   application:
     name: RememberMe
+  ai:
+    mcp:
+      server:
+        name: "remember-me-mcp-server"
+        version: "1.0.0"
+        type: SYNC
+        capabilities:
+          tool: true
+          resource: false
+          prompt: false
+          completion: false
+
 
   # Database configuration
   datasource:
