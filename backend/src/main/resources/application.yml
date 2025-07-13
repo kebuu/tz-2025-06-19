@@ -19,6 +19,7 @@ spring:
           resource: false
           prompt: false
           completion: false
+        base-url: /api
 
 
   # Database configuration

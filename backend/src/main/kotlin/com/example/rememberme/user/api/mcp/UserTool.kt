@@ -8,10 +8,11 @@ import org.springframework.stereotype.Component
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
 class UserTool(private val getUsersUseCase: GetUsersUseCase) {
 
-    /**
-     * Récupère la liste de tous les utilisateurs
-     */
-    @Tool(name = "list_users", description = "Récupère la liste de tous les utilisateurs disponibles dans le système")
+    companion object {
+        const val LIST_USERS_TOOL_NAME = "list_users"
+    }
+
+    @Tool(name = LIST_USERS_TOOL_NAME, description = "Récupère la liste de tous les utilisateurs disponibles dans le système")
     fun listUsers(): List<UserDto> {
         return getUsersUseCase.execute()
             .map { user ->

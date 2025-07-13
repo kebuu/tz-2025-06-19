@@ -1,5 +1,6 @@
 package com.example.rememberme
 
+import com.example.rememberme.memory.api.mcp.MemoryTool
 import com.example.rememberme.shared.domain.usecase.UseCase
 import com.example.rememberme.user.api.mcp.UserTool
 import org.springframework.ai.tool.ToolCallbackProvider
@@ -27,8 +28,15 @@ class RememberMeApplication {
     }
 
     @Bean
-    fun tools(userTool: UserTool): ToolCallbackProvider {
-        return MethodToolCallbackProvider.builder().toolObjects(userTool).build()
+    fun tools(
+        userTool: UserTool,
+        memoryTool: MemoryTool,
+    ): ToolCallbackProvider {
+        return MethodToolCallbackProvider.builder()
+            .toolObjects(
+                userTool,
+                memoryTool
+            ).build()
     }
 }
 

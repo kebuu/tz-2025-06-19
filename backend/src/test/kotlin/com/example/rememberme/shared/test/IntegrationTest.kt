@@ -6,6 +6,7 @@ import org.assertj.core.api.Assertions
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.MvcResult
@@ -16,10 +17,14 @@ import java.util.Base64
  * Base class for integration tests that use MockMvc.
  * Contains common annotations for Spring Boot integration tests.
  */
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 abstract class IntegrationTest {
+
+    @LocalServerPort
+    lateinit var localServerPort: Integer
+
     @Autowired
     lateinit var mockMvc: MockMvc
 
@@ -30,7 +35,7 @@ abstract class IntegrationTest {
         mvcResult: MvcResult,
         fieldName: String
     ) {
-        // Parse the response and verify it contains an error for the day field
+        // Parse the response and verify it contains an error for the given field
         val errors: Map<String, String> = objectMapper.readValue(mvcResult.response.contentAsString)
         Assertions.assertThat(errors).containsKey(fieldName)
         Assertions.assertThat(errors[fieldName]).isNotEmpty()
